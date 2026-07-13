@@ -1,6 +1,7 @@
 package com.med.co.serviceimpl;
 
 import java.util.List;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import com.med.co.repository.PatientRepository;
 import com.med.co.repository.RoleRepository;
 import com.med.co.repository.UserRepository;
 import com.med.co.service.PatientService;
+import com.med.co.exception.ResourceNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +28,7 @@ public class PatientServiceImpl implements PatientService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public ApiResponse<?> registerPatient(PatientRegistrationRequest request) {
@@ -37,16 +40,18 @@ public class PatientServiceImpl implements PatientService {
                         "Email already exists",
                         null);
             }
+            
+            
 
             Role role = roleRepository.findByRoleName(RoleType.PATIENT)
-                    .orElseThrow(() -> new RuntimeException("Patient role not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Patient role not found"));
 
             UserRole userrole = new UserRole();
             userrole.setEmail(request.getEmail());
-            userrole.setPassword(request.getPassword()); // Later encode with BCrypt
+            userrole.setPassword(passwordEncoder.encode(request.getPassword()));
             userrole.setEnabled(true);
             userrole.setRole(role);
-
+            
             UserRole savedUser = userRepository.save(userrole);
 
             Patient patient = modelMapper.map(request, Patient.class);
@@ -94,8 +99,8 @@ public class PatientServiceImpl implements PatientService {
 
         try {
 
-            Patient patient = patientRepository.findById(patientId)
-                    .orElseThrow(() -> new RuntimeException("Patient Not Found"));
+        	Patient patient = patientRepository.findById(patientId)
+        	        .orElseThrow(() -> new ResourceNotFoundException("Patient Not Found"));
 
             return new ApiResponse<>(
                     200,

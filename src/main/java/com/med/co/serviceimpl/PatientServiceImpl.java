@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.med.co.dto.request.PatientRegistrationRequest;
 import com.med.co.dto.response.ApiResponse;
+import com.med.co.dto.response.PatientResponseDto;
 import com.med.co.entity.Patient;
 import com.med.co.entity.Role;
 import com.med.co.entity.UserRole;
@@ -36,7 +37,8 @@ public class PatientServiceImpl implements PatientService {
         try {
 
             if (userRepository.existsByEmail(request.getEmail())) {
-                return new ApiResponse<>(400,
+                return new ApiResponse<>(
+                        400,
                         "Email already exists",
                         null);
             }
@@ -46,6 +48,7 @@ public class PatientServiceImpl implements PatientService {
             Role role = roleRepository.findByRoleName(RoleType.PATIENT)
                     .orElseThrow(() -> new ResourceNotFoundException("Patient role not found"));
 
+           feature/login
             UserRole userrole = new UserRole();
             userrole.setEmail(request.getEmail());
             userrole.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -54,15 +57,27 @@ public class PatientServiceImpl implements PatientService {
             
             UserRole savedUser = userRepository.save(userrole);
 
+            UserRole userRole = new UserRole();
+            userRole.setEmail(request.getEmail());
+            userRole.setPassword(request.getPassword()); // Encode later using BCrypt
+            userRole.setEnabled(true);
+            userRole.setRole(role);
+
+            UserRole savedUser = userRepository.save(userRole);
+             main
+
             Patient patient = modelMapper.map(request, Patient.class);
             patient.setUserrole(savedUser);
 
             Patient savedPatient = patientRepository.save(patient);
 
+            PatientResponseDto responseDto =
+                    modelMapper.map(savedPatient, PatientResponseDto.class);
+
             return new ApiResponse<>(
                     201,
                     "Patient Registered Successfully",
-                    savedPatient);
+                    responseDto);
 
         } catch (Exception e) {
 
@@ -80,10 +95,15 @@ public class PatientServiceImpl implements PatientService {
 
             List<Patient> patients = patientRepository.findAll();
 
+            List<PatientResponseDto> responseDtos = patients.stream()
+            		
+                    .map(patient -> modelMapper.map(patient, PatientResponseDto.class))
+                    .toList();
+
             return new ApiResponse<>(
                     200,
                     "Patient List",
-                    patients);
+                    responseDtos);
 
         } catch (Exception e) {
 
@@ -93,6 +113,7 @@ public class PatientServiceImpl implements PatientService {
                     null);
         }
     }
+    
 
     @Override
     public ApiResponse<?> getPatientById(Long patientId) {
@@ -102,10 +123,13 @@ public class PatientServiceImpl implements PatientService {
         	Patient patient = patientRepository.findById(patientId)
         	        .orElseThrow(() -> new ResourceNotFoundException("Patient Not Found"));
 
+            PatientResponseDto responseDto =
+                    modelMapper.map(patient, PatientResponseDto.class);
+
             return new ApiResponse<>(
                     200,
                     "Patient Found",
-                    patient);
+                    responseDto);
 
         } catch (Exception e) {
 
@@ -115,5 +139,4 @@ public class PatientServiceImpl implements PatientService {
                     null);
         }
     }
-
 }

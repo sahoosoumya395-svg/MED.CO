@@ -11,8 +11,11 @@ import com.med.co.service.PatientService;
 @RequestMapping("/api/patient")
 public class PatientController {
 
-    @Autowired
-    private PatientService patientService;
+    private final PatientService patientService;
+
+    PatientController(PatientService patientService) {
+        this.patientService = patientService;
+    }
 
     @PostMapping("/register")
     public ApiResponse<?> registerPatient(@RequestBody PatientRegistrationRequest request) {

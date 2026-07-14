@@ -11,4 +11,7 @@ public interface PatientService {
 
     ApiResponse<?> getPatientById(Long patientId);
 
+    ApiResponse<?> updatePatient(Long patientId, PatientRegistrationRequest request);
+
+    ApiResponse<?> deletePatient(Long patientId);
 }

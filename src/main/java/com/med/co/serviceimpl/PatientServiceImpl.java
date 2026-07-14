@@ -125,52 +125,36 @@ public class PatientServiceImpl implements PatientService {
             Patient patient = patientRepository.findById(patientId)
                     .orElseThrow(() -> new ResourceNotFoundException("Patient Not Found"));
 
-            patient.setFirstName(request.getFirstName());
-            patient.setMiddleName(request.getMiddleName());
-            patient.setLastName(request.getLastName());
-            patient.setGender(request.getGender());
-            patient.setDateOfBirth(request.getDateOfBirth());
-            patient.setBloodGroup(request.getBloodGroup());
-            patient.setNationality(request.getNationality());
-            patient.setProfilePhoto(request.getProfilePhoto());
-            patient.setMobileNumber(request.getMobileNumber());
-            patient.setAlternateNumber(request.getAlternateNumber());
-            patient.setAddress(request.getAddress());
-            patient.setCity(request.getCity());
-            patient.setState(request.getState());
-            patient.setCountry(request.getCountry());
-            patient.setPinCode(request.getPinCode());
-            patient.setHeight(request.getHeight());
-            patient.setWeight(request.getWeight());
-            patient.setVisionStatus(request.getVisionStatus());
-            patient.setBodyTemperature(request.getBodyTemperature());
-            patient.setHearingStatus(request.getHearingStatus());
+            // Maps matching fields from request to patient
+            modelMapper.map(request, patient);
 
             UserRole user = patient.getUserrole();
-            user.setEmail(request.getEmail());
 
+            // Map matching fields (e.g. email)
+            modelMapper.map(request, user);
+
+            // Password should be handled manually because it needs encoding
             if (request.getPassword() != null && !request.getPassword().isBlank()) {
                 user.setPassword(passwordEncoder.encode(request.getPassword()));
             }
 
             userRepository.save(user);
-
-            Patient updatedPatient = patientRepository.save(patient);
+            patientRepository.save(patient);
 
             PatientResponseDto responseDto =
-                    modelMapper.map(updatedPatient, PatientResponseDto.class);
+                    modelMapper.map(patient, PatientResponseDto.class);
 
-            return new ApiResponse<>(200,
-                    "Patient Updated Successfully",
-                    responseDto);
-
+            return new ApiResponse<>(
+                    200,
+                    "Patient updated successfully",
+                    responseDto
+            );
         } catch (Exception e) {
-
-            return new ApiResponse<>(500,
-                    e.getMessage(),
-                    null);
+            throw e;
         }
     }
+
+       
 
     @Override
     public ApiResponse<?> deletePatient(Long patientId) {

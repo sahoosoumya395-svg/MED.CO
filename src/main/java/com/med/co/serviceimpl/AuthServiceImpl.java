@@ -37,12 +37,13 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtils.generateJwtToken(authentication);
 
         UserRole user = userRepository.findByEmail(request.getEmail()).get();
-
         LoginResponse response = new LoginResponse(
-                user.getId(),
-                user.getEmail(),
                 user.getRole().getRoleName().name(),
-                token);
+                "Bearer",
+                token,
+                jwtUtils.getJwtExpirationMs(),
+                jwtUtils.getJwtExpirationMinutes()
+        );
 
         return new ApiResponse<>(
                 200,

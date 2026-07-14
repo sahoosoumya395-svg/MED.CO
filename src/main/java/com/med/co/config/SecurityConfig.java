@@ -22,33 +22,62 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration) throws Exception {
+            AuthenticationConfiguration configuration)
+            throws Exception {
 
         return configuration.getAuthenticationManager();
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+            throws Exception {
 
         http
+
                 .csrf(csrf -> csrf.disable())
 
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
+<<<<<<< HEAD
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/patient/register",
                                 "/api/doctors/register")
                         .permitAll()
+=======
+>>>>>>> 7dddcbfee37c92a5f66beb5baa5962dc292453bd
 
+                        .requestMatchers(
+
+                                "/api/auth/login",
+                                "/api/auth/test-email",
+
+                                "/api/patient/register",
+
+                                "/api/doctors/register"
+
+                        ).permitAll()
+
+                       
+                        .requestMatchers(
+                                "/api/doctors/**"
+                        ).hasRole("DOCTOR")
+
+                        
+                        .requestMatchers(
+                                "/api/patient/**"
+                        ).hasRole("PATIENT")
+
+                       
                         .anyRequest()
                         .authenticated())
 
                 .httpBasic(Customizer.withDefaults());
 
-        http.addFilterBefore(jwtAuthFilter,
+        http.addFilterBefore(
+                jwtAuthFilter,
                 UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

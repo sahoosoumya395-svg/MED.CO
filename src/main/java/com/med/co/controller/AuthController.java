@@ -1,6 +1,8 @@
 package com.med.co.controller;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.web.bind.annotation.*;
 
 import com.med.co.dto.request.LoginRequest;
@@ -22,6 +24,11 @@ public class AuthController {
 
         return authService.login(request);
     }
+<<<<<<< HEAD
    
+=======
+    
+
+>>>>>>> 7dddcbfee37c92a5f66beb5baa5962dc292453bd
 
 }

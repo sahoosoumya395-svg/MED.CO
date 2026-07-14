@@ -1,6 +1,5 @@
 package com.med.co.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.med.co.dto.request.PatientRegistrationRequest;
@@ -30,5 +29,16 @@ public class PatientController {
     @GetMapping("/{id}")
     public ApiResponse<?> getPatientById(@PathVariable Long id) {
         return patientService.getPatientById(id);
+    }
+
+    @PutMapping("/update/{id}")
+    public ApiResponse<?> updatePatient(@PathVariable Long id,
+                                        @RequestBody PatientRegistrationRequest request) {
+        return patientService.updatePatient(id, request);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ApiResponse<?> deletePatient(@PathVariable Long id) {
+        return patientService.deletePatient(id);
     }
 }

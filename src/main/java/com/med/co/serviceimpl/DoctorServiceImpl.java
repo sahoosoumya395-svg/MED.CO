@@ -1,5 +1,7 @@
 package com.med.co.serviceimpl;
 
+import java.util.List;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,8 +22,7 @@ import com.med.co.service.DoctorService;
 @Service
 public class DoctorServiceImpl implements DoctorService {
 
-    @Autowired
-    private DoctorRepository doctorRepository;
+    private final DoctorRepository doctorRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -35,6 +36,12 @@ public class DoctorServiceImpl implements DoctorService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    public DoctorServiceImpl(DoctorRepository doctorRepository, ModelMapper modelMapper) {
+        this.doctorRepository = doctorRepository;
+        this.modelMapper = modelMapper;
+    }
+
+    // Register Doctor
     @Override
     public DoctorResponseDto registerDoctor(DoctorRegistrationRequest request) {
 
@@ -70,6 +77,7 @@ public class DoctorServiceImpl implements DoctorService {
         return modelMapper.map(savedDoctor, DoctorResponseDto.class);
     }
 
+    // Get Doctor By Id
     @Override
     public DoctorResponseDto getDoctorById(Long id) {
 
@@ -77,5 +85,43 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
 
         return modelMapper.map(doctor, DoctorResponseDto.class);
+    }
+
+    // Get All Doctors
+    @Override
+    public List<DoctorResponseDto> getAllDoctors() {
+
+        List<Doctor> doctors = doctorRepository.findAll();
+
+        return doctors.stream()
+                .map(doctor -> modelMapper.map(doctor, DoctorResponseDto.class))
+                .toList();
+    }
+
+    // Update Doctor
+    @Override
+    public DoctorResponseDto updateDoctor(Long id, DoctorRegistrationRequest request) {
+
+        Doctor existingDoctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        // Copy all matching fields from request to existing entity
+        modelMapper.map(request, existingDoctor);
+
+        Doctor updatedDoctor = doctorRepository.save(existingDoctor);
+
+        return modelMapper.map(updatedDoctor, DoctorResponseDto.class);
+    }
+
+    // Delete Doctor
+    @Override
+    public String deleteDoctor(Long id) { 
+
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        doctorRepository.delete(doctor);
+
+        return "Doctor deleted successfully";
     }
 }

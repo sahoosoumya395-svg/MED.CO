@@ -48,7 +48,7 @@ public class PatientServiceImpl implements PatientService {
             Role role = roleRepository.findByRoleName(RoleType.PATIENT)
                     .orElseThrow(() -> new ResourceNotFoundException("Patient role not found"));
 
-           feature/login
+           
             UserRole userrole = new UserRole();
             userrole.setEmail(request.getEmail());
             userrole.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -62,9 +62,7 @@ public class PatientServiceImpl implements PatientService {
             userRole.setPassword(request.getPassword()); // Encode later using BCrypt
             userRole.setEnabled(true);
             userRole.setRole(role);
-
-            UserRole savedUser = userRepository.save(userRole);
-             main
+             
 
             Patient patient = modelMapper.map(request, Patient.class);
             patient.setUserrole(savedUser);

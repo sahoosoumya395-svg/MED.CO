@@ -19,7 +19,7 @@ public class UserRole {
     private String email;
 
     @Column(nullable = false)
-    private String password;
+    private String password;                           
 
     private Boolean enabled = true;
 

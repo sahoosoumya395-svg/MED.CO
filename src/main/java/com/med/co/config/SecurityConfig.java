@@ -40,7 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/patient/register",
-                                "/api/doctor/register")
+                                "/api/doctors/register")
                         .permitAll()
 
                         .anyRequest()

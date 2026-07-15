@@ -7,7 +7,7 @@ public interface PatientService {
 
     ApiResponse<?> registerPatient(PatientRegistrationRequest request);
 
-    ApiResponse<?> getAllPatients();
+    ApiResponse<?> getAllPatients(int page, int size, String sortBy, String direction);
 
     ApiResponse<?> getPatientById(Long patientId);
 

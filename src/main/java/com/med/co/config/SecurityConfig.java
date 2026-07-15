@@ -8,23 +8,14 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import com.med.co.security.JwtAuthFilter;
-
-import lombok.RequiredArgsConstructor;
 
 @Configuration
-@RequiredArgsConstructor
 public class SecurityConfig {
-
-    private final JwtAuthFilter jwtAuthFilter;
 
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration)
             throws Exception {
-
         return configuration.getAuthenticationManager();
     }
 
@@ -33,52 +24,13 @@ public class SecurityConfig {
             throws Exception {
 
         http
-
                 .csrf(csrf -> csrf.disable())
-
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                .authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/api/patient/register",
-                                "/api/doctors/register")
-                        .permitAll()
-
-                        .requestMatchers(
-
-                                "/api/auth/login",
-                                "/api/auth/test-email",
-
-                                "/api/patient/register",
-
-                                "/api/doctors/register"
-
-                        ).permitAll()
-
-                       
-                        .requestMatchers(
-                                "/api/doctors/**"
-                        ).hasRole("DOCTOR")
-
-                        
-                        .requestMatchers(
-                                "/api/patient/**"
-                        ).hasRole("PATIENT")
-
-                       
-                        .anyRequest()
-                        .authenticated())
-
+                .authorizeHttpRequests(auth ->
+                        auth.anyRequest().permitAll())
                 .httpBasic(Customizer.withDefaults());
-
-        http.addFilterBefore(
-                jwtAuthFilter,
-                UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
 }

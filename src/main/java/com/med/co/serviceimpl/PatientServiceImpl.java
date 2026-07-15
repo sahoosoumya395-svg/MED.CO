@@ -20,6 +20,10 @@ import com.med.co.repository.UserRepository;
 import com.med.co.service.PatientService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @Service
 @RequiredArgsConstructor
@@ -86,28 +90,34 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public ApiResponse<?> getAllPatients() {
+    public ApiResponse<?> getAllPatients(int page, int size, String sortBy, String direction) {
 
         try {
 
-            List<Patient> patients = patientRepository.findAll();
+            Sort sort = direction.equalsIgnoreCase("desc")
+                    ? Sort.by(sortBy).descending()
+                    : Sort.by(sortBy).ascending();
 
-            List<PatientResponseDto> responseDtos = patients.stream()
-                    .map(patient -> modelMapper.map(patient, PatientResponseDto.class))
-                    .toList();
+            Pageable pageable = PageRequest.of(page, size, sort);
 
-            return new ApiResponse<>(200,
+            Page<Patient> patientPage = patientRepository.findAll(pageable);
+
+            Page<PatientResponseDto> responseDtos = patientPage.map(
+                    patient -> modelMapper.map(patient, PatientResponseDto.class));
+
+            return new ApiResponse<>(
+                    200,
                     "Patient List",
                     responseDtos);
 
         } catch (Exception e) {
 
-            return new ApiResponse<>(500,
+            return new ApiResponse<>(
+                    500,
                     e.getMessage(),
                     null);
         }
     }
-
     @Override
     public ApiResponse<?> getPatientById(Long patientId) {
 

@@ -22,10 +22,14 @@ public class PatientController {
     }
 
     @GetMapping("/all")
-    public ApiResponse<?> getAllPatients() {
-        return patientService.getAllPatients();
-    }
+    public ApiResponse<?> getAllPatients(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "patientId") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
 
+        return patientService.getAllPatients(page, size, sortBy, direction);
+    }
     @GetMapping("/{id}")
     public ApiResponse<?> getPatientById(@PathVariable Long id) {
         return patientService.getPatientById(id);

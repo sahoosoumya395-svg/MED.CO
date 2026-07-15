@@ -1,6 +1,8 @@
 package com.med.co.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+
+//import java.util.List;
 
 import com.med.co.dto.request.DoctorRegistrationRequest;
 import com.med.co.dto.response.DoctorResponseDto;
@@ -11,7 +13,12 @@ public interface DoctorService {
 
     DoctorResponseDto getDoctorById(Long id);
 
-    List<DoctorResponseDto> getAllDoctors();
+//    List<DoctorResponseDto> getAllDoctors();
+    Page<DoctorResponseDto> getAllDoctors(
+            int page,
+            int size,
+            String sortBy,
+            String direction);
 
     DoctorResponseDto updateDoctor(Long id, DoctorRegistrationRequest request);
 

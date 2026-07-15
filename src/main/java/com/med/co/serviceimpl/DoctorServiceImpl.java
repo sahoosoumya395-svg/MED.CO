@@ -1,9 +1,13 @@
 package com.med.co.serviceimpl;
 
-import java.util.List;
+//import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,21 +28,21 @@ public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorRepository doctorRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
     @Autowired
     private ModelMapper modelMapper;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    public DoctorServiceImpl(DoctorRepository doctorRepository, ModelMapper modelMapper) {
+    public DoctorServiceImpl(DoctorRepository doctorRepository, ModelMapper modelMapper, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.doctorRepository = doctorRepository;
         this.modelMapper = modelMapper;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // Register Doctor
@@ -89,13 +93,22 @@ public class DoctorServiceImpl implements DoctorService {
 
     // Get All Doctors
     @Override
-    public List<DoctorResponseDto> getAllDoctors() {
+    public Page<DoctorResponseDto> getAllDoctors(
+            int page,
+            int size,
+            String sortBy,
+            String direction) {
 
-        List<Doctor> doctors = doctorRepository.findAll();
+        Sort sort = direction.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
 
-        return doctors.stream()
-                .map(doctor -> modelMapper.map(doctor, DoctorResponseDto.class))
-                .toList();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Doctor> doctorPage = doctorRepository.findAll(pageable);
+
+        return doctorPage.map(doctor ->
+                modelMapper.map(doctor, DoctorResponseDto.class));
     }
 
     // Update Doctor

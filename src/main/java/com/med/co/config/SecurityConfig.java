@@ -53,6 +53,14 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/doctors/register"
                         ).permitAll()
+                        
+                        .requestMatchers(
+                        		"/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/webjars/**",
+                                "/error"
+                        		).permitAll()
 
                         .requestMatchers("/api/doctors/**")
                         .hasRole("DOCTOR")
@@ -72,6 +80,9 @@ public class SecurityConfig {
 
         return http.build();
     }
+    
+    
+    
     
 
 }

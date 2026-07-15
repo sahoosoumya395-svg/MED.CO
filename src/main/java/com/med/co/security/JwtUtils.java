@@ -1,6 +1,5 @@
 package com.med.co.security;
 
-import java.security.Key;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -11,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -64,12 +65,22 @@ public class JwtUtils {
 
             return true;
 
-        } catch (Exception e) {
+        } catch (ExpiredJwtException e) {
 
-            return false;
+            throw new RuntimeException("JWT Token Expired");
 
+        } catch (JwtException e) {
+
+            throw new RuntimeException("Invalid JWT Token");
         }
+    }
 
+    public long getJwtExpirationMs() {
+        return jwtExpirationMs;
+    }
+
+    public long getJwtExpirationMinutes() {
+        return jwtExpirationMs / 60000;
     }
 
 }

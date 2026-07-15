@@ -1,20 +1,22 @@
 package com.med.co.dto.response;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class LoginResponse {
-
-    private Long userId;
-
-    private String email;
 
     private String role;
 
+    private String tokenType = "Bearer";
+
     private String token;
+
+    private long expiresInMs;
+
+    private long expiresInMinutes;
 
 }

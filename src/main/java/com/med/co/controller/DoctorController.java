@@ -41,7 +41,8 @@ public class DoctorController {
             @PathVariable Long id) {
 
         return ResponseEntity.ok(
-                doctorService.getDoctorById(id));
+           
+        		doctorService.getDoctorById(id));
     }
 
     @GetMapping("/all")

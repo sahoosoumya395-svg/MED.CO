@@ -9,6 +9,9 @@ import com.med.co.dto.request.VerifyOtpRequest;
 import com.med.co.dto.response.ApiResponse;
 import com.med.co.service.AuthService;
 
+import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -19,9 +22,11 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ApiResponse<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(
+            @Valid @RequestBody LoginRequest request){
 
-        return authService.login(request);
+        return ResponseEntity.ok(authService.login(request));
+
     }
 
     @PostMapping("/forgot-password")

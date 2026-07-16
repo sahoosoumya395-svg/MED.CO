@@ -16,6 +16,7 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration)
             throws Exception {
+
         return configuration.getAuthenticationManager();
     }
 
@@ -25,33 +26,46 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
+
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
 
+                        // Authentication APIs
                         .requestMatchers(
-                                "/api/auth/**",
-                                "/api/patient/register",
-                                "/api/doctors/register")
-                        .permitAll()
+                                "/api/auth/**"
+                               
+                        ).permitAll()
 
+                        // Registration APIs
+                        .requestMatchers(
+                                "/api/patient/register",
+                                "/api/doctors/register"
+                        ).permitAll()
+
+                        // Swagger
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/webjars/**",
-                                "/error")
-                        .permitAll()
+                                "/error"
+                        ).permitAll()
 
+                        // Doctor APIs
                         .requestMatchers("/api/doctors/**")
                         .hasRole("DOCTOR")
 
+                        // Patient APIs
                         .requestMatchers("/api/patient/**")
                         .hasRole("PATIENT")
 
+                        // All other APIs require authentication
                         .anyRequest()
-                        .authenticated())
+                        .authenticated()
+
+                )
 
                 .httpBasic(Customizer.withDefaults());
 

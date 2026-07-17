@@ -1,32 +1,33 @@
 package com.med.co.serviceimpl;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
-
-import com.med.co.dto.request.LoginRequest;
-import com.med.co.dto.response.ApiResponse;
-import com.med.co.dto.response.LoginResponse;
-import com.med.co.entity.UserRole;
-import com.med.co.repository.UserRepository;
-import com.med.co.security.JwtUtils;
-import com.med.co.service.AuthService;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.med.co.dto.request.ForgotPasswordRequest;
+import com.med.co.dto.request.LoginRequest;
 import com.med.co.dto.request.ResetPasswordRequest;
 import com.med.co.dto.request.VerifyOtpRequest;
+import com.med.co.dto.response.ApiResponse;
+import com.med.co.dto.response.LoginResponse;
 import com.med.co.entity.PasswordResetOtp;
-import com.med.co.service.EmailService;
+import com.med.co.entity.UserRole;
+import com.med.co.exception.BadRequestException;
 import com.med.co.repository.PasswordResetOtpRepository;
+import com.med.co.repository.UserRepository;
+import com.med.co.security.JwtUtils;
+import com.med.co.service.AuthService;
+import com.med.co.service.CaptchaService;
+import com.med.co.service.EmailService;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,15 +38,33 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtils jwtUtils;
 
     private final UserRepository userRepository;
+
     private final PasswordResetOtpRepository otpRepository;
 
     private final EmailService emailService;
 
     private final PasswordEncoder passwordEncoder;
 
-    
+    private final CaptchaService captchaService;
+
     @Override
     public ApiResponse<?> login(LoginRequest request) {
+
+        // ==========================
+        // Validate Captcha First
+        // ==========================
+
+        boolean validCaptcha = captchaService.validateCaptcha(
+                request.getCaptchaId(),
+                request.getCaptcha());
+
+        if (!validCaptcha) {
+            throw new BadRequestException("Invalid or Expired Captcha");
+        }
+
+        // ==========================
+        // Authenticate User
+        // ==========================
 
         Authentication authentication =
                 authenticationManager.authenticate(
@@ -53,9 +72,16 @@ public class AuthServiceImpl implements AuthService {
                                 request.getEmail(),
                                 request.getPassword()));
 
+        // ==========================
+        // Generate JWT Token
+        // ==========================
+
         String token = jwtUtils.generateJwtToken(authentication);
 
-        UserRole user = userRepository.findByEmail(request.getEmail()).get();
+        UserRole user = userRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("User Not Found"));
+
         LoginResponse response = new LoginResponse(
                 user.getRole().getRoleName().name(),
                 "Bearer",
@@ -69,7 +95,7 @@ public class AuthServiceImpl implements AuthService {
                 "Login Successful",
                 response);
     }
-    
+
     private String generateOtp() {
 
         Random random = new Random();
@@ -77,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
         return String.format("%06d", random.nextInt(999999));
 
     }
-    
+
     @Transactional
     @Override
     public ApiResponse<?> forgotPassword(ForgotPasswordRequest request) {
@@ -116,6 +142,7 @@ public class AuthServiceImpl implements AuthService {
                 null);
 
     }
+
     @Override
     public ApiResponse<?> verifyOtp(VerifyOtpRequest request) {
 
@@ -159,6 +186,7 @@ public class AuthServiceImpl implements AuthService {
                 null);
 
     }
+
     @Transactional
     @Override
     public ApiResponse<?> resetPassword(ResetPasswordRequest request) {
@@ -220,5 +248,4 @@ public class AuthServiceImpl implements AuthService {
                 null
         );
     }
-
 }

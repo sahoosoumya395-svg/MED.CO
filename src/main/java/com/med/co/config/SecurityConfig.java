@@ -1,6 +1,7 @@
 package com.med.co.config;
 
 import org.springframework.context.annotation.Bean;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -40,8 +41,8 @@ public class SecurityConfig {
 
                         // Registration APIs
                         .requestMatchers(
-                                "/api/patient/register",
-                                "/api/doctors/register"
+                                "/api/patient/**",
+                                "/api/doctors/**"
                         ).permitAll()
 
                         // Swagger
@@ -53,13 +54,13 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
 
-                        // Doctor APIs
-                        .requestMatchers("/api/doctors/**")
-                        .hasRole("DOCTOR")
-
-                        // Patient APIs
-                        .requestMatchers("/api/patient/**")
-                        .hasRole("PATIENT")
+//                        // Doctor APIs
+//                        .requestMatchers("/api/doctors/**")
+//                        .hasRole("DOCTOR")
+//
+//                        // Patient APIs
+//                        .requestMatchers("/api/patient/**")
+//                        .hasRole("PATIENT")
 
                         // All other APIs require authentication
                         .anyRequest()

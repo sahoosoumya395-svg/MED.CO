@@ -28,6 +28,14 @@ import com.med.co.service.CaptchaService;
 import com.med.co.service.EmailService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+import com.med.co.entity.RevokedToken;
+import com.med.co.repository.RevokedTokenRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
 
     private final CaptchaService captchaService;
+    private final RevokedTokenRepository revokedTokenRepository;
 
     @Override
     public ApiResponse<?> login(LoginRequest request) {
@@ -248,4 +257,53 @@ public class AuthServiceImpl implements AuthService {
                 null
         );
     }
+    
+    @Override
+    public ApiResponse<?> logout(HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+
+            return new ApiResponse<>(
+                    400,
+                    "Authorization token is missing",
+                    null
+            );
+        }
+
+        String token = authHeader.substring(7);
+
+        if (revokedTokenRepository.existsByToken(token)) {
+
+            return new ApiResponse<>(
+                    200,
+                    "Already Logged Out",
+                    null
+            );
+        }
+
+        RevokedToken revokedToken = new RevokedToken();
+
+        revokedToken.setToken(token);
+
+        revokedToken.setExpiryTime(
+
+                jwtUtils.getExpirationDateFromToken(token)
+                        .toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime()
+
+        );
+
+        revokedTokenRepository.save(revokedToken);
+
+        return new ApiResponse<>(
+                200,
+                "Logout Successful",
+                null
+        );
+    }
+    
+    
 }

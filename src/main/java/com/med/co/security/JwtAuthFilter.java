@@ -1,7 +1,6 @@
 package com.med.co.security;
 
 import java.io.IOException;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +14,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import com.med.co.repository.RevokedTokenRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
 
     private final CustomUserDetailsService userDetailsService;
+    private final RevokedTokenRepository revokedTokenRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -35,6 +39,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String jwt = parseJwt(request);
 
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+
+                if (revokedTokenRepository.existsByToken(jwt)) {
+
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+
+                    Map<String, Object> error = new HashMap<>();
+                    error.put("statusCode", 401);
+                    error.put("message", "JWT Token has expired. Please login again.");
+                    error.put("data", null);
+
+                    new ObjectMapper().writeValue(response.getWriter(), error);
+
+                    return;
+                }
 
                 String username = jwtUtils.getUsernameFromJwtToken(jwt);
 

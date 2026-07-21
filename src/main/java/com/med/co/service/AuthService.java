@@ -6,6 +6,8 @@ import com.med.co.dto.request.ResetPasswordRequest;
 import com.med.co.dto.request.VerifyOtpRequest;
 import com.med.co.dto.response.ApiResponse;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 public interface AuthService {
 
     ApiResponse<?> login(LoginRequest request);
@@ -15,5 +17,7 @@ public interface AuthService {
     ApiResponse<?> verifyOtp(VerifyOtpRequest request);
 
     ApiResponse<?> resetPassword(ResetPasswordRequest request);
+
+    ApiResponse<?> logout(HttpServletRequest request);
 
 }

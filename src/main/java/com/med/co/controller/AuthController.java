@@ -1,18 +1,16 @@
 package com.med.co.controller;
 
 import org.springframework.web.bind.annotation.*;
-
 import com.med.co.dto.request.ForgotPasswordRequest;
 import com.med.co.dto.request.LoginRequest;
 import com.med.co.dto.request.ResetPasswordRequest;
 import com.med.co.dto.request.VerifyOtpRequest;
 import com.med.co.dto.response.ApiResponse;
 import com.med.co.service.AuthService;
-
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -50,5 +48,14 @@ public class AuthController {
 
         return authService.resetPassword(request);
     }
+    
+    @PostMapping("/logout")
+    public ApiResponse<?> logout(HttpServletRequest request){
+
+        return authService.logout(request);
+
+    }
+    
+  
 
 }

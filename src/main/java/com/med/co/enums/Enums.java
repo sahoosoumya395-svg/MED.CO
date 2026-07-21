@@ -25,4 +25,9 @@ public class Enums {
         O_NEGATIVE
     }
 
+    public enum DoctorStatus {
+        AVAILABLE,
+        ON_LEAVE
+    }
+
 }

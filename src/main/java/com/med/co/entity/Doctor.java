@@ -2,6 +2,8 @@ package com.med.co.entity;
 
 import java.time.LocalDate;
 
+import com.med.co.enums.Enums.DoctorStatus;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -70,4 +72,8 @@ public class Doctor {
     private String department;
 
     private String designation;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DoctorStatus status;
 }

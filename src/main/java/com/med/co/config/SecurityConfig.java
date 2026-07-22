@@ -1,7 +1,6 @@
 package com.med.co.config;
 
 import org.springframework.context.annotation.Bean;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -14,38 +13,34 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration)
-            throws Exception {
-
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-                .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
 
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Authentication APIs
-                        .requestMatchers(
-                                "/api/auth/**"
-                               
-                        ).permitAll()
-
-                        // Registration APIs
+                       
+                        
+                        // Public APIs
                         .requestMatchers(
                                 "/api/patient/**",
-                                "/api/doctors/**"
+                                "/api/doctors/**",
+                                "/api/departments/**",
+                                "/api/doctor-availability/**",
+                                "/api/auth/**",
+                                "/api/doctor-leaves/**"
+                                
                         ).permitAll()
 
-                        // Swagger
+                        // Swagger APIs
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
@@ -54,18 +49,8 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
 
-//                        // Doctor APIs
-//                        .requestMatchers("/api/doctors/**")
-//                        .hasRole("DOCTOR")
-//
-//                        // Patient APIs
-//                        .requestMatchers("/api/patient/**")
-//                        .hasRole("PATIENT")
-
                         // All other APIs require authentication
-                        .anyRequest()
-                        .authenticated()
-
+                        .anyRequest().authenticated()
                 )
 
                 .httpBasic(Customizer.withDefaults());

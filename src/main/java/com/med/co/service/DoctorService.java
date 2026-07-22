@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 //import java.util.List;
 
 import com.med.co.dto.request.DoctorRegistrationRequest;
+import com.med.co.dto.request.LeaveStatusRequestDto;
+import com.med.co.dto.response.DoctorLeaveResponseDto;
 import com.med.co.dto.response.DoctorResponseDto;
 
 public interface DoctorService {
@@ -23,4 +25,6 @@ public interface DoctorService {
     DoctorResponseDto updateDoctor(Long id, DoctorRegistrationRequest request);
 
     String deleteDoctor(Long id);
+    DoctorLeaveResponseDto updateLeaveStatus(Long leaveId,
+            LeaveStatusRequestDto request);
 }

@@ -1,9 +1,6 @@
 package com.med.co.serviceimpl;
 
-//import java.util.List;
-
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,36 +9,45 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.med.co.dto.request.DoctorRegistrationRequest;
+import com.med.co.dto.request.LeaveStatusRequestDto;
+import com.med.co.dto.response.DoctorLeaveResponseDto;
 import com.med.co.dto.response.DoctorResponseDto;
+import com.med.co.entity.Department;
 import com.med.co.entity.Doctor;
 import com.med.co.entity.Role;
 import com.med.co.entity.UserRole;
 import com.med.co.enums.Enums.RoleType;
 import com.med.co.exception.ResourceNotFoundException;
+import com.med.co.repository.DepartmentRepository;
 import com.med.co.repository.DoctorRepository;
 import com.med.co.repository.RoleRepository;
 import com.med.co.repository.UserRepository;
 import com.med.co.service.DoctorService;
 
+
 @Service
 public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorRepository doctorRepository;
-
     private final UserRepository userRepository;
-
     private final RoleRepository roleRepository;
-
-    @Autowired
-    private ModelMapper modelMapper;
-
+    private final DepartmentRepository departmentRepository;
+    private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
 
-    public DoctorServiceImpl(DoctorRepository doctorRepository, ModelMapper modelMapper, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public DoctorServiceImpl(
+            DoctorRepository doctorRepository,
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            DepartmentRepository departmentRepository,
+            ModelMapper modelMapper,
+            PasswordEncoder passwordEncoder) {
+
         this.doctorRepository = doctorRepository;
-        this.modelMapper = modelMapper;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.departmentRepository = departmentRepository;
+        this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -72,8 +78,11 @@ public class DoctorServiceImpl implements DoctorService {
 
         userRepository.save(user);
 
-        Doctor doctor = modelMapper.map(request, Doctor.class);
+        Department department = departmentRepository.findById(request.getDepartmentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
 
+        Doctor doctor = modelMapper.map(request, Doctor.class);
+        doctor.setDepartment(department);
         doctor.setPassword(passwordEncoder.encode(request.getPassword()));
 
         Doctor savedDoctor = doctorRepository.save(doctor);
@@ -86,7 +95,7 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorResponseDto getDoctorById(Long id) {
 
         Doctor doctor = doctorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
 
         return modelMapper.map(doctor, DoctorResponseDto.class);
     }
@@ -107,8 +116,7 @@ public class DoctorServiceImpl implements DoctorService {
 
         Page<Doctor> doctorPage = doctorRepository.findAll(pageable);
 
-        return doctorPage.map(doctor ->
-                modelMapper.map(doctor, DoctorResponseDto.class));
+        return doctorPage.map(doctor -> modelMapper.map(doctor, DoctorResponseDto.class));
     }
 
     // Update Doctor
@@ -116,10 +124,18 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorResponseDto updateDoctor(Long id, DoctorRegistrationRequest request) {
 
         Doctor existingDoctor = doctorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
 
-        // Copy all matching fields from request to existing entity
+        Department department = departmentRepository.findById(request.getDepartmentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+
         modelMapper.map(request, existingDoctor);
+
+        existingDoctor.setDepartment(department);
+
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            existingDoctor.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
 
         Doctor updatedDoctor = doctorRepository.save(existingDoctor);
 
@@ -128,13 +144,20 @@ public class DoctorServiceImpl implements DoctorService {
 
     // Delete Doctor
     @Override
-    public String deleteDoctor(Long id) { 
+    public String deleteDoctor(Long id) {
 
         Doctor doctor = doctorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
 
         doctorRepository.delete(doctor);
 
         return "Doctor deleted successfully";
     }
+
+	@Override
+	public DoctorLeaveResponseDto updateLeaveStatus(Long leaveId, LeaveStatusRequestDto request) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+    
 }

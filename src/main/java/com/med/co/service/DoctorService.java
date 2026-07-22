@@ -25,10 +25,9 @@ public interface DoctorService {
     DoctorResponseDto updateDoctor(Long id, DoctorRegistrationRequest request);
 
     String deleteDoctor(Long id);
-<<<<<<< HEAD
     DoctorLeaveResponseDto updateLeaveStatus(Long leaveId,
             LeaveStatusRequestDto request);
-=======
+
     long getTotalDoctors();
->>>>>>> f0115cec8e81bf178ccbb127e55ee5d1a98b9a52
+
 }

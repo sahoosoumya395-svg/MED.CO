@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Entity
 @Table(name = "doctor")
@@ -69,11 +70,14 @@ public class Doctor {
 
     private Integer experience;
 
-    private String department;
-
+    @ManyToOne
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
     private String designation;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
     private DoctorStatus status;
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
+    private List<DoctorAvailability> availabilities;
 }

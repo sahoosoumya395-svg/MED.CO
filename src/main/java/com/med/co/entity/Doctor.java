@@ -38,7 +38,7 @@ public class Doctor {
 
     private String nationality;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 10)
     private String mobileNumber;
 
     private String alternateMobileNumber;

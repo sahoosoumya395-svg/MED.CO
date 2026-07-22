@@ -36,6 +36,7 @@ public class Patient {
 
     private String profilePhoto;
 
+    @Column(nullable = false, unique = true, length = 10)
     private String mobileNumber;
 
     private String alternateNumber;

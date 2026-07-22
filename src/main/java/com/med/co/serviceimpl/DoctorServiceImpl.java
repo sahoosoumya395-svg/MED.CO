@@ -153,6 +153,7 @@ public class DoctorServiceImpl implements DoctorService {
 
         return "Doctor deleted successfully";
     }
+<<<<<<< HEAD
 
 	@Override
 	public DoctorLeaveResponseDto updateLeaveStatus(Long leaveId, LeaveStatusRequestDto request) {
@@ -160,4 +161,12 @@ public class DoctorServiceImpl implements DoctorService {
 		return null;
 	}
     
+=======
+    @Override
+    public long getTotalDoctors() {
+
+        return doctorRepository.count();
+
+    }
+>>>>>>> f0115cec8e81bf178ccbb127e55ee5d1a98b9a52
 }

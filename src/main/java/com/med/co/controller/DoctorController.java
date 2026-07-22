@@ -82,4 +82,12 @@ public class DoctorController {
         return ResponseEntity.ok(
                 doctorService.deleteDoctor(id));
     }
+    
+    @GetMapping("/count")
+    public ResponseEntity<Long> getTotalDoctors() {
+
+        return ResponseEntity.ok(
+                doctorService.getTotalDoctors());
+
+    }
 }

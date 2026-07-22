@@ -76,7 +76,7 @@ public class Doctor {
     private String designation;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private DoctorStatus status;
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
     private List<DoctorAvailability> availabilities;

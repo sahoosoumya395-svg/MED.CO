@@ -74,6 +74,6 @@ public class Doctor {
     private String designation;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private DoctorStatus status;
 }

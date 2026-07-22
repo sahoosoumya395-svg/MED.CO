@@ -137,4 +137,10 @@ public class DoctorServiceImpl implements DoctorService {
 
         return "Doctor deleted successfully";
     }
+    @Override
+    public long getTotalDoctors() {
+
+        return doctorRepository.count();
+
+    }
 }

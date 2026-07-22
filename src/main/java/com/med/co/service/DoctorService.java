@@ -23,4 +23,5 @@ public interface DoctorService {
     DoctorResponseDto updateDoctor(Long id, DoctorRegistrationRequest request);
 
     String deleteDoctor(Long id);
+    long getTotalDoctors();
 }

@@ -39,4 +39,11 @@ public class DepartmentController {
     public ApiResponse<?> deleteDepartment(@PathVariable Long id) {
         return departmentService.deleteDepartment(id);
     }
+    
+    @GetMapping("/count")
+    public ApiResponse<?> getTotalDepartments() {
+
+        return departmentService.getTotalDepartments();
+
+    }
 }

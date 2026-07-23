@@ -1,6 +1,7 @@
 package com.med.co.serviceimpl;
 
-import java.util.List;
+import java.util.*;
+
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -114,5 +115,33 @@ public class DepartmentServiceImpl implements DepartmentService {
         } catch (Exception e) {
             return new ApiResponse<>(500, e.getMessage(), null);
         }
+    }
+    
+    @Override
+    public ApiResponse<?> getTotalDepartments() {
+
+        try {
+
+            long totalDepartments = departmentRepository.count();
+
+            Map<String, Long> data = new HashMap<>();
+            data.put("totalDepartments", totalDepartments);
+
+            return new ApiResponse<>(
+                    200,
+                    "Total Departments fetched successfully",
+                    data
+            );
+
+        } catch (Exception e) {
+
+            return new ApiResponse<>(
+                    500,
+                    e.getMessage(),
+                    null
+            );
+
+        }
+
     }
 }

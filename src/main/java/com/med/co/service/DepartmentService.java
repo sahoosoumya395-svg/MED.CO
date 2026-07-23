@@ -16,4 +16,6 @@ public interface DepartmentService {
     ApiResponse updateDepartment(Long departmentId, DepartmentRequest request);
 
     ApiResponse deleteDepartment(Long departmentId);
+    
+    ApiResponse<?> getTotalDepartments();
 }

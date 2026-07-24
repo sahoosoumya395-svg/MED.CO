@@ -16,52 +16,53 @@ import lombok.*;
 @AllArgsConstructor
 public class Patient {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long patientId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long patientId;
 
-    private String firstName;
-    private String middleName;
-    private String lastName;
+	private String firstName;
+	private String middleName;
+	private String lastName;
 
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
+	@Enumerated(EnumType.STRING)
+	private Gender gender;
 
-    private LocalDate dateOfBirth;
+	private LocalDate dateOfBirth;
 
-    @Enumerated(EnumType.STRING)
-    private BloodGroup bloodGroup;
+	@Enumerated(EnumType.STRING)
+	private BloodGroup bloodGroup;
 
-    private String nationality;
+	private String nationality;
 
-    private String profilePhoto;
+	private String profilePhoto;
 
     @Column(nullable = false, unique = true, length = 10)
     private String mobileNumber;
 
-    private String alternateNumber;
+	private String alternateNumber;
 
-    private String address;
+	private String address;
 
-    private String city;
+	private String city;
 
-    private String state;
+	private String state;
 
-    private String country;
+	private String country;
 
-    private String pinCode;
+	private String pinCode;
 
-    private Double height;
+	private Double height;
 
-    private Double weight;
+	private Double weight;
 
-    private String visionStatus;
+	private String visionStatus;
 
-    private Double bodyTemperature;
+	private Double bodyTemperature;
 
-    private String hearingStatus;
+	private String hearingStatus;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private UserRole userrole;
+	@OneToOne
+	@JoinColumn(name = "user_id")
+	private UserRole userrole;
+
 }

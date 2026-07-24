@@ -24,149 +24,158 @@ import com.med.co.repository.RoleRepository;
 import com.med.co.repository.UserRepository;
 import com.med.co.service.DoctorService;
 
-
 @Service
 public class DoctorServiceImpl implements DoctorService {
 
-    private final DoctorRepository doctorRepository;
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final DepartmentRepository departmentRepository;
-    private final ModelMapper modelMapper;
-    private final PasswordEncoder passwordEncoder;
+	private final DoctorRepository doctorRepository;
+	private final UserRepository userRepository;
+	private final RoleRepository roleRepository;
+	private final DepartmentRepository departmentRepository;
+	private final ModelMapper modelMapper;
+	private final PasswordEncoder passwordEncoder;
 
-    public DoctorServiceImpl(
-            DoctorRepository doctorRepository,
-            UserRepository userRepository,
-            RoleRepository roleRepository,
-            DepartmentRepository departmentRepository,
-            ModelMapper modelMapper,
-            PasswordEncoder passwordEncoder) {
+	public DoctorServiceImpl(DoctorRepository doctorRepository, UserRepository userRepository,
+			RoleRepository roleRepository, DepartmentRepository departmentRepository, ModelMapper modelMapper,
+			PasswordEncoder passwordEncoder) {
 
-        this.doctorRepository = doctorRepository;
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.departmentRepository = departmentRepository;
-        this.modelMapper = modelMapper;
-        this.passwordEncoder = passwordEncoder;
-    }
+		this.doctorRepository = doctorRepository;
+		this.userRepository = userRepository;
+		this.roleRepository = roleRepository;
+		this.departmentRepository = departmentRepository;
+		this.modelMapper = modelMapper;
+		this.passwordEncoder = passwordEncoder;
+	}
 
-    // Register Doctor
-    @Override
-    public DoctorResponseDto registerDoctor(DoctorRegistrationRequest request) {
+	// Register Doctor
+	@Override
+	public DoctorResponseDto registerDoctor(DoctorRegistrationRequest request) {
 
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
-        }
+		if (userRepository.existsByEmail(request.getEmail())) {
+			throw new RuntimeException("Email already exists");
+		}
 
-        if (doctorRepository.existsByMobileNumber(request.getMobileNumber())) {
-            throw new RuntimeException("Mobile number already exists");
-        }
+		if (doctorRepository.existsByMobileNumber(request.getMobileNumber())) {
+			throw new RuntimeException("Mobile number already exists");
+		}
 
-        if (doctorRepository.existsByMedicalRegistrationNumber(request.getMedicalRegistrationNumber())) {
-            throw new RuntimeException("Medical Registration Number already exists");
-        }
+		if (doctorRepository.existsByMedicalRegistrationNumber(request.getMedicalRegistrationNumber())) {
+			throw new RuntimeException("Medical Registration Number already exists");
+		}
 
-        Role role = roleRepository.findByRoleName(RoleType.DOCTOR)
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor role not found"));
+		Role role = roleRepository.findByRoleName(RoleType.DOCTOR)
+				.orElseThrow(() -> new ResourceNotFoundException("Doctor role not found"));
 
-        UserRole user = new UserRole();
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setEnabled(true);
-        user.setRole(role);
+		UserRole user = new UserRole();
+		user.setEmail(request.getEmail());
+		user.setPassword(passwordEncoder.encode(request.getPassword()));
+		user.setEnabled(true);
+		user.setRole(role);
 
-        userRepository.save(user);
+		userRepository.save(user);
 
-        Department department = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+		Department department = departmentRepository.findById(request.getDepartmentId())
+				.orElseThrow(() -> new ResourceNotFoundException("Department not found"));
 
-        Doctor doctor = modelMapper.map(request, Doctor.class);
-        doctor.setDepartment(department);
-        doctor.setPassword(passwordEncoder.encode(request.getPassword()));
+		Doctor doctor = modelMapper.map(request, Doctor.class);
+		doctor.setDepartment(department);
+		doctor.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        Doctor savedDoctor = doctorRepository.save(doctor);
+		Doctor savedDoctor = doctorRepository.save(doctor);
 
-        return modelMapper.map(savedDoctor, DoctorResponseDto.class);
-    }
+		DoctorResponseDto response = modelMapper.map(savedDoctor, DoctorResponseDto.class);
 
-    // Get Doctor By Id
-    @Override
-    public DoctorResponseDto getDoctorById(Long id) {
+		response.setDepartmentId(savedDoctor.getDepartment().getDepartmentId());
+		response.setDepartmentName(savedDoctor.getDepartment().getDepartmentName());
 
-        Doctor doctor = doctorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+		return response;
+	}
 
-        return modelMapper.map(doctor, DoctorResponseDto.class);
-    }
+	// Get Doctor By Id
+	@Override
+	public DoctorResponseDto getDoctorById(Long id) {
 
-    // Get All Doctors
-    @Override
-    public Page<DoctorResponseDto> getAllDoctors(
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
+		Doctor doctor = doctorRepository.findById(id)
+		        .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
 
-        Sort sort = direction.equalsIgnoreCase("asc")
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
+		DoctorResponseDto response = modelMapper.map(doctor, DoctorResponseDto.class);
 
-        Pageable pageable = PageRequest.of(page, size, sort);
+		response.setDepartmentId(doctor.getDepartment().getDepartmentId());
+		response.setDepartmentName(doctor.getDepartment().getDepartmentName());
 
-        Page<Doctor> doctorPage = doctorRepository.findAll(pageable);
+		return response;
+	}
 
-        return doctorPage.map(doctor -> modelMapper.map(doctor, DoctorResponseDto.class));
-    }
+	// Get All Doctors
+	@Override
+	public Page<DoctorResponseDto> getAllDoctors(int page, int size, String sortBy, String direction) {
 
-    // Update Doctor
-    @Override
-    public DoctorResponseDto updateDoctor(Long id, DoctorRegistrationRequest request) {
+		Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
 
-        Doctor existingDoctor = doctorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+		Pageable pageable = PageRequest.of(page, size, sort);
 
-        Department department = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+		Page<Doctor> doctorPage = doctorRepository.findAll(pageable);
 
-        modelMapper.map(request, existingDoctor);
+		return doctorPage.map(doctor -> {
+		    DoctorResponseDto response = modelMapper.map(doctor, DoctorResponseDto.class);
 
-        existingDoctor.setDepartment(department);
+		    response.setDepartmentId(doctor.getDepartment().getDepartmentId());
+		    response.setDepartmentName(doctor.getDepartment().getDepartmentName());
 
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            existingDoctor.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
+		    return response;
+		});
+	}
 
-        Doctor updatedDoctor = doctorRepository.save(existingDoctor);
+	// Update Doctor
+	@Override
+	public DoctorResponseDto updateDoctor(Long id, DoctorRegistrationRequest request) {
 
-        return modelMapper.map(updatedDoctor, DoctorResponseDto.class);
-    }
+		Doctor existingDoctor = doctorRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
 
-    // Delete Doctor
-    @Override
-    public String deleteDoctor(Long id) {
+		Department department = departmentRepository.findById(request.getDepartmentId())
+				.orElseThrow(() -> new ResourceNotFoundException("Department not found"));
 
-        Doctor doctor = doctorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+		modelMapper.map(request, existingDoctor);
 
-        doctorRepository.delete(doctor);
+		existingDoctor.setDepartment(department);
 
-        return "Doctor deleted successfully";
-    }
+		if (request.getPassword() != null && !request.getPassword().isBlank()) {
+			existingDoctor.setPassword(passwordEncoder.encode(request.getPassword()));
+		}
 
+		Doctor updatedDoctor = doctorRepository.save(existingDoctor);
+
+		DoctorResponseDto response = modelMapper.map(updatedDoctor, DoctorResponseDto.class);
+
+		response.setDepartmentId(updatedDoctor.getDepartment().getDepartmentId());
+		response.setDepartmentName(updatedDoctor.getDepartment().getDepartmentName());
+
+		return response;
+	}
+
+	// Delete Doctor
+	@Override
+	public String deleteDoctor(Long id) {
+
+		Doctor doctor = doctorRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+
+		doctorRepository.delete(doctor);
+
+		return "Doctor deleted successfully";
+	}
 
 	@Override
 	public DoctorLeaveResponseDto updateLeaveStatus(Long leaveId, LeaveStatusRequestDto request) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-    
 
-    @Override
-    public long getTotalDoctors() {
+	@Override
+	public long getTotalDoctors() {
 
-        return doctorRepository.count();
+		return doctorRepository.count();
 
-    }
+	}
 
 }

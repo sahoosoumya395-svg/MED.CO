@@ -1,6 +1,6 @@
 package com.med.co.entity;
 
-import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 import jakarta.persistence.*;
@@ -23,10 +23,9 @@ public class DoctorAvailability {
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private DayOfWeek dayOfWeek;
-
+    @Column(name = "available_date", nullable = false)
+    private LocalDate availableDate;
+    
     @Column(nullable = false)
     private LocalTime startTime;
 

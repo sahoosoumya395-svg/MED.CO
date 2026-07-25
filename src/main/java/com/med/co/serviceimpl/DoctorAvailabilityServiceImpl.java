@@ -35,7 +35,7 @@ public class DoctorAvailabilityServiceImpl implements DoctorAvailabilityService 
         DoctorAvailability availability = new DoctorAvailability();
 
         availability.setDoctor(doctor);
-        availability.setDayOfWeek(request.getDayOfWeek());
+        availability.setAvailableDate(request.getAvailableDate());
         availability.setStartTime(request.getStartTime());
         availability.setEndTime(request.getEndTime());
         availability.setAvailable(request.getAvailable());
@@ -60,7 +60,7 @@ public class DoctorAvailabilityServiceImpl implements DoctorAvailabilityService 
         DoctorAvailability availability = availabilityRepository.findById(availabilityId)
                 .orElseThrow(() -> new RuntimeException("Availability not found"));
 
-        availability.setDayOfWeek(request.getDayOfWeek());
+        availability.setAvailableDate(request.getAvailableDate());
         availability.setStartTime(request.getStartTime());
         availability.setEndTime(request.getEndTime());
         availability.setAvailable(request.getAvailable());

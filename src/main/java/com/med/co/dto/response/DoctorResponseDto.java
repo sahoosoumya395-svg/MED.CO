@@ -38,6 +38,9 @@ public class DoctorResponseDto {
     private String qualification;
     private String specialization;
     private Integer experience;
-    private String department;
+
+    private Long departmentId;
+    private String departmentName;
+
     private String designation;
 }

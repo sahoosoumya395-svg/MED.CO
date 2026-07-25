@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.med.co.dto.request.DoctorRegistrationRequest;
+import com.med.co.dto.response.ApiResponse;
 import com.med.co.dto.response.DoctorResponseDto;
 import com.med.co.service.DoctorService;
 
@@ -30,23 +31,21 @@ public class DoctorController {
         this.doctorService = doctorService;
     }
 
+    
+
     @PostMapping("/register")
-    public ResponseEntity<DoctorResponseDto> registerDoctor(
+    public ResponseEntity<ApiResponse<DoctorResponseDto>> registerDoctor(
             @RequestBody DoctorRegistrationRequest request) {
 
-        return ResponseEntity.ok(
-                doctorService.registerDoctor(request));
+        DoctorResponseDto doctor = doctorService.registerDoctor(request);
+
+        ApiResponse<DoctorResponseDto> response = new ApiResponse<>();
+        response.setStatusCode(200);
+        response.setMessage("Doctor registered successfully");
+        response.setData(doctor);
+
+        return ResponseEntity.ok(response);
     }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<DoctorResponseDto> getDoctorById(
-            @PathVariable Long id) {
-
-        return ResponseEntity.ok(
-           
-        		doctorService.getDoctorById(id));
-    }
-
     @GetMapping("/all")
     public ResponseEntity<Page<DoctorResponseDto>> getAllDoctors(
 

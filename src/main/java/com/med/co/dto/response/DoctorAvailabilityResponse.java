@@ -1,6 +1,6 @@
 package com.med.co.dto.response;
 
-import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 import lombok.AllArgsConstructor;
@@ -20,7 +20,7 @@ public class DoctorAvailabilityResponse {
 
     private String doctorName;
 
-    private DayOfWeek dayOfWeek;
+    private LocalDate availableDate;
 
     private LocalTime startTime;
 

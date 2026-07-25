@@ -1,6 +1,6 @@
 package com.med.co.dto.request;
 
-import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ public class DoctorAvailabilityRequest {
 
     private Long doctorId;
 
-    private DayOfWeek dayOfWeek;
+    private LocalDate availableDate;
 
     private LocalTime startTime;
 

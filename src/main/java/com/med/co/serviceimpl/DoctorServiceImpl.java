@@ -16,6 +16,7 @@ import com.med.co.entity.Department;
 import com.med.co.entity.Doctor;
 import com.med.co.entity.Role;
 import com.med.co.entity.UserRole;
+import com.med.co.enums.Enums.DoctorStatus;
 import com.med.co.enums.Enums.RoleType;
 import com.med.co.exception.ResourceNotFoundException;
 import com.med.co.repository.DepartmentRepository;
@@ -23,7 +24,6 @@ import com.med.co.repository.DoctorRepository;
 import com.med.co.repository.RoleRepository;
 import com.med.co.repository.UserRepository;
 import com.med.co.service.DoctorService;
-
 
 @Service
 public class DoctorServiceImpl implements DoctorService {
@@ -81,32 +81,61 @@ public class DoctorServiceImpl implements DoctorService {
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
 
-        Doctor doctor = modelMapper.map(request, Doctor.class);
-        doctor.setDepartment(department);
+        Doctor doctor = new Doctor();
+
+        doctor.setFirstName(request.getFirstName());
+        doctor.setMiddleName(request.getMiddleName());
+        doctor.setLastName(request.getLastName());
+        doctor.setGender(request.getGender());
+        doctor.setDateOfBirth(request.getDateOfBirth());
+        doctor.setBloodGroup(request.getBloodGroup());
+        doctor.setNationality(request.getNationality());
+        doctor.setMobileNumber(request.getMobileNumber());
+        doctor.setAlternateMobileNumber(request.getAlternateMobileNumber());
+        doctor.setEmail(request.getEmail());
         doctor.setPassword(passwordEncoder.encode(request.getPassword()));
+        doctor.setAddress(request.getAddress());
+        doctor.setCity(request.getCity());
+        doctor.setState(request.getState());
+        doctor.setCountry(request.getCountry());
+        doctor.setPinCode(request.getPinCode());
+        doctor.setMedicalRegistrationNumber(request.getMedicalRegistrationNumber());
+        doctor.setQualification(request.getQualification());
+        doctor.setSpecialization(request.getSpecialization());
+        doctor.setExperience(request.getExperience());
+        doctor.setDesignation(request.getDesignation());
+
+        doctor.setDepartment(department);
+
+        // Default status while registering
+        doctor.setStatus(DoctorStatus.AVAILABLE);
 
         Doctor savedDoctor = doctorRepository.save(doctor);
 
-        return modelMapper.map(savedDoctor, DoctorResponseDto.class);
-    }
+        DoctorResponseDto response = modelMapper.map(savedDoctor, DoctorResponseDto.class);
+        response.setDepartmentId(savedDoctor.getDepartment().getDepartmentId());
+        response.setDepartmentName(savedDoctor.getDepartment().getDepartmentName());
 
-    // Get Doctor By Id
+        return response;
+    }
+ // Get Doctor By Id
     @Override
     public DoctorResponseDto getDoctorById(Long id) {
 
         Doctor doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
 
-        return modelMapper.map(doctor, DoctorResponseDto.class);
+        DoctorResponseDto response = modelMapper.map(doctor, DoctorResponseDto.class);
+
+        response.setDepartmentId(doctor.getDepartment().getDepartmentId());
+        response.setDepartmentName(doctor.getDepartment().getDepartmentName());
+
+        return response;
     }
 
     // Get All Doctors
     @Override
-    public Page<DoctorResponseDto> getAllDoctors(
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
+    public Page<DoctorResponseDto> getAllDoctors(int page, int size, String sortBy, String direction) {
 
         Sort sort = direction.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
@@ -116,7 +145,15 @@ public class DoctorServiceImpl implements DoctorService {
 
         Page<Doctor> doctorPage = doctorRepository.findAll(pageable);
 
-        return doctorPage.map(doctor -> modelMapper.map(doctor, DoctorResponseDto.class));
+        return doctorPage.map(doctor -> {
+
+            DoctorResponseDto response = modelMapper.map(doctor, DoctorResponseDto.class);
+
+            response.setDepartmentId(doctor.getDepartment().getDepartmentId());
+            response.setDepartmentName(doctor.getDepartment().getDepartmentName());
+
+            return response;
+        });
     }
 
     // Update Doctor
@@ -129,8 +166,26 @@ public class DoctorServiceImpl implements DoctorService {
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
 
-        modelMapper.map(request, existingDoctor);
-
+        existingDoctor.setFirstName(request.getFirstName());
+        existingDoctor.setMiddleName(request.getMiddleName());
+        existingDoctor.setLastName(request.getLastName());
+        existingDoctor.setGender(request.getGender());
+        existingDoctor.setDateOfBirth(request.getDateOfBirth());
+        existingDoctor.setBloodGroup(request.getBloodGroup());
+        existingDoctor.setNationality(request.getNationality());
+        existingDoctor.setMobileNumber(request.getMobileNumber());
+        existingDoctor.setAlternateMobileNumber(request.getAlternateMobileNumber());
+        existingDoctor.setEmail(request.getEmail());
+        existingDoctor.setAddress(request.getAddress());
+        existingDoctor.setCity(request.getCity());
+        existingDoctor.setState(request.getState());
+        existingDoctor.setCountry(request.getCountry());
+        existingDoctor.setPinCode(request.getPinCode());
+        existingDoctor.setMedicalRegistrationNumber(request.getMedicalRegistrationNumber());
+        existingDoctor.setQualification(request.getQualification());
+        existingDoctor.setSpecialization(request.getSpecialization());
+        existingDoctor.setExperience(request.getExperience());
+        existingDoctor.setDesignation(request.getDesignation());
         existingDoctor.setDepartment(department);
 
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
@@ -139,7 +194,12 @@ public class DoctorServiceImpl implements DoctorService {
 
         Doctor updatedDoctor = doctorRepository.save(existingDoctor);
 
-        return modelMapper.map(updatedDoctor, DoctorResponseDto.class);
+        DoctorResponseDto response = modelMapper.map(updatedDoctor, DoctorResponseDto.class);
+
+        response.setDepartmentId(updatedDoctor.getDepartment().getDepartmentId());
+        response.setDepartmentName(updatedDoctor.getDepartment().getDepartmentName());
+
+        return response;
     }
 
     // Delete Doctor
@@ -154,19 +214,14 @@ public class DoctorServiceImpl implements DoctorService {
         return "Doctor deleted successfully";
     }
 
-
-	@Override
-	public DoctorLeaveResponseDto updateLeaveStatus(Long leaveId, LeaveStatusRequestDto request) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-    
+    @Override
+    public DoctorLeaveResponseDto updateLeaveStatus(Long leaveId, LeaveStatusRequestDto request) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public long getTotalDoctors() {
-
         return doctorRepository.count();
-
     }
-
 }

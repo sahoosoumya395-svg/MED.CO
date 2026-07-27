@@ -15,6 +15,7 @@ import com.med.co.repository.DoctorLeaveRepository;
 import com.med.co.repository.DoctorRepository;
 import com.med.co.service.DoctorLeaveService;
 import java.time.LocalDate;
+import com.med.co.enums.LeaveStatus;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -91,6 +92,31 @@ public class DoctorLeaveServiceImpl implements DoctorLeaveService {
     public void deleteLeave(Long leaveId) {
 
         doctorLeaveRepository.deleteById(leaveId);
+    }
+
+    @Override
+    public long countDoctorsOnLeave(LocalDate date) {
+        if (date == null) {
+            date = LocalDate.now();
+        }
+
+        return doctorLeaveRepository.countDistinctDoctorsOnLeaveByStatusAndDate(
+                LeaveStatus.APPROVED, date);
+    }
+
+    @Override
+    public long countTotalLeaves() {
+        return doctorLeaveRepository.countTotalLeaves();
+    }
+
+    @Override
+    public long countLeavesByStatus(LeaveStatus status) {
+        return doctorLeaveRepository.countByStatus(status);
+    }
+
+    @Override
+    public long countActiveLeaves() {
+        return doctorLeaveRepository.countActiveLeaves(LeaveStatus.APPROVED);
     }
 
     private DoctorLeaveResponseDto mapToResponse(DoctorLeave leave) {

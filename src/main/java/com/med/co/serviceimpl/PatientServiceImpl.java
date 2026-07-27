@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +36,7 @@ public class PatientServiceImpl implements PatientService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     @Override
     public ApiResponse<?> registerPatient(PatientRegistrationRequest request) {
 
@@ -47,31 +49,23 @@ public class PatientServiceImpl implements PatientService {
             Role role = roleRepository.findByRoleName(RoleType.PATIENT)
                     .orElseThrow(() -> new ResourceNotFoundException("Patient role not found"));
 
-           
+            // Create Patient first (before saving UserRole)
+            Patient patient = modelMapper.map(request, Patient.class);
+
+            // Create UserRole but DON'T save yet
             UserRole userrole = new UserRole();
             userrole.setEmail(request.getEmail());
             userrole.setPassword(passwordEncoder.encode(request.getPassword()));
             userrole.setEnabled(true);
             userrole.setRole(role);
-            
+
+            // Save UserRole to get the ID
             UserRole savedUser = userRepository.save(userrole);
 
-            UserRole userRole = new UserRole();
-            userRole.setEmail(request.getEmail());
-            userRole.setPassword(request.getPassword()); // Encode later using BCrypt
-            userRole.setEnabled(true);
-            userRole.setRole(role);
-             
-            UserRole user = new UserRole();
-            user.setEmail(request.getEmail());
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-            user.setEnabled(true);
-            user.setRole(role);
-
-
-            Patient patient = modelMapper.map(request, Patient.class);
+            // Link the saved UserRole to patient
             patient.setUserrole(savedUser);
 
+            // Save patient - only now after UserRole is successfully saved
             Patient savedPatient = patientRepository.save(patient);
 
             PatientResponseDto responseDto =

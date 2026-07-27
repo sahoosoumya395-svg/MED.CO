@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.med.co.dto.request.DoctorRegistrationRequest;
 import com.med.co.dto.request.LeaveStatusRequestDto;
@@ -52,6 +53,7 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     // Register Doctor
+    @Transactional
     @Override
     public DoctorResponseDto registerDoctor(DoctorRegistrationRequest request) {
 
@@ -70,17 +72,10 @@ public class DoctorServiceImpl implements DoctorService {
         Role role = roleRepository.findByRoleName(RoleType.DOCTOR)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor role not found"));
 
-        UserRole user = new UserRole();
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setEnabled(true);
-        user.setRole(role);
-
-        userRepository.save(user);
-
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
 
+        // Create Doctor first and set all properties
         Doctor doctor = new Doctor();
 
         doctor.setFirstName(request.getFirstName());
@@ -93,7 +88,6 @@ public class DoctorServiceImpl implements DoctorService {
         doctor.setMobileNumber(request.getMobileNumber());
         doctor.setAlternateMobileNumber(request.getAlternateMobileNumber());
         doctor.setEmail(request.getEmail());
-        doctor.setPassword(passwordEncoder.encode(request.getPassword()));
         doctor.setAddress(request.getAddress());
         doctor.setCity(request.getCity());
         doctor.setState(request.getState());
@@ -110,7 +104,17 @@ public class DoctorServiceImpl implements DoctorService {
         // Default status while registering
         doctor.setStatus(DoctorStatus.AVAILABLE);
 
+        // Save Doctor first
         Doctor savedDoctor = doctorRepository.save(doctor);
+
+        // Create and save UserRole ONLY after Doctor is successfully saved
+        UserRole user = new UserRole();
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setEnabled(true);
+        user.setRole(role);
+
+        userRepository.save(user);
 
         DoctorResponseDto response = modelMapper.map(savedDoctor, DoctorResponseDto.class);
         response.setDepartmentId(savedDoctor.getDepartment().getDepartmentId());
@@ -187,10 +191,6 @@ public class DoctorServiceImpl implements DoctorService {
         existingDoctor.setExperience(request.getExperience());
         existingDoctor.setDesignation(request.getDesignation());
         existingDoctor.setDepartment(department);
-
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            existingDoctor.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
 
         Doctor updatedDoctor = doctorRepository.save(existingDoctor);
 

@@ -7,5 +7,6 @@ import com.med.co.entity.Patient;
 
 @Repository
 public interface PatientRepository extends JpaRepository<Patient, Long> {
+	boolean existsByMrnNo(String mrnNo);
 
 }

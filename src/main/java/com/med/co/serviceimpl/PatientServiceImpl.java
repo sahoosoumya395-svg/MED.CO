@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -72,8 +73,11 @@ public class PatientServiceImpl implements PatientService {
             Patient patient = modelMapper.map(request, Patient.class);
             patient.setUserrole(savedUser);
 
-            Patient savedPatient = patientRepository.save(patient);
+            // Generate MRN
+            String mrnNo = generateMrnNo();
+            patient.setMrnNo(mrnNo);
 
+            Patient savedPatient = patientRepository.save(patient);
             PatientResponseDto responseDto =
                     modelMapper.map(savedPatient, PatientResponseDto.class);
 
@@ -207,4 +211,24 @@ public class PatientServiceImpl implements PatientService {
                     null);
         }
     }
+    
+    
+    
+    
+    private String generateMrnNo() {
+
+        Random random = new Random();
+        String mrnNo;
+
+        do {
+            mrnNo = "MRN" + (100000 + random.nextInt(900000));
+        } while (patientRepository.existsByMrnNo(mrnNo));
+
+        return mrnNo;
+    }
+    
+    
+    
+    
+    
 }

@@ -52,6 +52,11 @@ public class PatientResponseDto {
 
     private String visionStatus;
 
+
+    private String mrnNO;
+    
+    
+
     private Double bodyTemperature;
 
     private String hearingStatus;

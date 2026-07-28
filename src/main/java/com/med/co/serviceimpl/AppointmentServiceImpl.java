@@ -13,6 +13,7 @@ import com.med.co.dto.request.AppointmentRequestDto;
 import com.med.co.dto.response.AppointmentResponseDto;
 import com.med.co.entity.Appointment;
 import com.med.co.entity.Doctor;
+import com.med.co.service.MasterService;
 import com.med.co.entity.DoctorAvailability;
 import com.med.co.entity.DoctorLeave;
 import com.med.co.entity.Patient;
@@ -24,6 +25,7 @@ import com.med.co.repository.DoctorLeaveRepository;
 import com.med.co.repository.DoctorRepository;
 import com.med.co.repository.PatientRepository;
 import com.med.co.service.AppointmentService;
+import com.med.co.service.MasterService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,6 +38,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 	private final PatientRepository patientRepository;
 	private final DoctorAvailabilityRepository availabilityRepository;
 	private final DoctorLeaveRepository leaveRepository;
+	private final MasterService masterservice;
 
 	@Override
     public AppointmentResponseDto bookAppointment(AppointmentRequestDto requestDto) {
@@ -99,6 +102,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         // Save Appointment
+    
         Appointment appointment = Appointment.builder()
                 .doctor(doctor)
                 .patient(patient)
@@ -108,8 +112,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .status(AppointmentStatus.BOOKED)
                 .build();
 
-        Appointment saved =
-                appointmentRepository.save(appointment);
+        Appointment saved = appointmentRepository.save(appointment);
+
+        // Automatically create Master record
+        masterservice.createMasterRecord(saved);
 
         return mapToResponse1(saved);
     }

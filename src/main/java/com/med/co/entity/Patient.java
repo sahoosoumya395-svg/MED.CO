@@ -60,6 +60,8 @@ public class Patient {
 	private Double bodyTemperature;
 
 	private String hearingStatus;
+	@Column(name = "mrn_no", unique = true, nullable = false)
+	private String mrnNo;
 
 	@OneToOne
 	@JoinColumn(name = "user_id")

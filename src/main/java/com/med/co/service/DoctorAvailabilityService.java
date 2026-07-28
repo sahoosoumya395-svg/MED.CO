@@ -1,7 +1,10 @@
 package com.med.co.service;
 
+import java.time.LocalDate;
+
 import com.med.co.dto.request.DoctorAvailabilityRequest;
 import com.med.co.dto.response.ApiResponse;
+import com.med.co.dto.response.AvailableDoctorsCountResponse;
 
 public interface DoctorAvailabilityService {
 
@@ -16,4 +19,7 @@ public interface DoctorAvailabilityService {
 
     // Delete availability
     ApiResponse<?> deleteAvailability(Long availabilityId);
+
+    // Count available doctors on a specific date
+    AvailableDoctorsCountResponse countAvailableDoctorsOn(LocalDate date);
 }

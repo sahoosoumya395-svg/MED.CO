@@ -30,6 +30,12 @@ public class PatientController {
 
         return patientService.getAllPatients(page, size, sortBy, direction);
     }
+
+    @GetMapping("/count")
+    public ApiResponse<?> countAllPatients() {
+        return patientService.countAllPatients();
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<?> getPatientById(@PathVariable Long id) {
         return patientService.getPatientById(id);

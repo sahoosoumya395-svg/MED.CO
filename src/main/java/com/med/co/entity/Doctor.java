@@ -42,16 +42,11 @@ public class Doctor {
 
     @Column(nullable = false, unique = true, length = 10)
     private String mobileNumber;
-	@Column(nullable = false, unique = true)
-//	private String mobileNumber;
 
 	private String alternateMobileNumber;
 
 	@Column(nullable = false, unique = true)
 	private String email;
-
-	@Column(nullable = false)
-	private String password;
 
 	@Column(length = 500)
 	private String address;

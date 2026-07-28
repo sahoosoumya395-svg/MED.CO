@@ -22,5 +22,12 @@ public interface DoctorAvailabilityRepository extends JpaRepository<DoctorAvaila
             Long doctorId,
             LocalDate availableDate);
 
+    // Get all doctors available on a specific date
+    List<DoctorAvailability> findByAvailableDateAndAvailableTrue(LocalDate availableDate);
+
+    // Get distinct doctor IDs available on a specific date
+    @org.springframework.data.jpa.repository.Query("SELECT DISTINCT da.doctor.id FROM DoctorAvailability da " +
+           "WHERE da.availableDate = :date AND da.available = true")
+    List<Long> findDistinctDoctorIdsAvailableOn(@org.springframework.data.repository.query.Param("date") LocalDate date);
 
 }

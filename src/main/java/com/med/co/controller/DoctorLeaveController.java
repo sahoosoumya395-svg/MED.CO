@@ -5,6 +5,9 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 
 import com.med.co.dto.request.DoctorLeaveRequestDto;
 import com.med.co.dto.request.LeaveStatusRequestDto;
@@ -78,6 +81,45 @@ public class DoctorLeaveController {
         doctorLeaveService.deleteLeave(leaveId);
 
         return ResponseEntity.ok("Doctor Leave deleted successfully.");
+    }
+    
+    @GetMapping("/count")
+    public ResponseEntity<Long> countDoctorsOnLeave(
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        if (date == null) {
+            date = LocalDate.now();
+        }
+
+        return ResponseEntity.ok(
+                doctorLeaveService.countDoctorsOnLeave(date));
+    }
+
+    @GetMapping("/count/total")
+    public ResponseEntity<Long> countTotalLeaves() {
+        return ResponseEntity.ok(
+                doctorLeaveService.countTotalLeaves());
+    }
+
+    @GetMapping("/count/status/{status}")
+    public ResponseEntity<Long> countLeavesByStatus(
+            @PathVariable String status) {
+
+        try {
+            com.med.co.enums.LeaveStatus leaveStatus = 
+                    com.med.co.enums.LeaveStatus.valueOf(status.toUpperCase());
+            return ResponseEntity.ok(
+                    doctorLeaveService.countLeavesByStatus(leaveStatus));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/count/active")
+    public ResponseEntity<Long> countActiveLeaves() {
+        return ResponseEntity.ok(
+                doctorLeaveService.countActiveLeaves());
     }
     
     

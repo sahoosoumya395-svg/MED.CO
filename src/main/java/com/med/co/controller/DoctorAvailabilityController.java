@@ -1,10 +1,15 @@
 package com.med.co.controller;
 
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.med.co.dto.request.DoctorAvailabilityRequest;
 import com.med.co.dto.response.ApiResponse;
+import com.med.co.dto.response.AvailableDoctorsCountResponse;
 import com.med.co.service.DoctorAvailabilityService;
 
 @RestController
@@ -39,5 +44,13 @@ public class DoctorAvailabilityController {
     @DeleteMapping("/{availabilityId}")
     public ApiResponse<?> deleteAvailability(@PathVariable Long availabilityId) {
         return doctorAvailabilityService.deleteAvailability(availabilityId);
+    }
+
+    // Count available doctors on a specific date
+    @GetMapping("/available/count")
+    public ResponseEntity<AvailableDoctorsCountResponse> countAvailableDoctors(
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        AvailableDoctorsCountResponse response = doctorAvailabilityService.countAvailableDoctorsOn(date);
+        return ResponseEntity.ok(response);
     }
 }

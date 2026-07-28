@@ -38,7 +38,13 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/doctor-leaves/**",
                                 "/api/appointments/**",
-                                "/api/prescriptions/**"
+
+                                "/api/prescriptions/**",
+
+                                
+                                "/api/billing/**"
+                                
+
                                 
                         ).permitAll()
 

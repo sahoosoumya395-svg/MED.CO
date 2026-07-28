@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+
 import java.util.List;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -103,6 +105,7 @@ public class BillingInvoiceController {
 	 */
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<BillingInvoiceResponseDto>> getBillingInvoiceById(
+			@Positive(message = "Invoice ID must be greater than 0")
 			@PathVariable Long id) {
 
 		BillingInvoiceResponseDto response = billingInvoiceService.getBillingInvoiceById(id);

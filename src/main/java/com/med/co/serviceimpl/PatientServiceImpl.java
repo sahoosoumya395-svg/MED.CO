@@ -75,7 +75,7 @@ public class PatientServiceImpl implements PatientService {
             patient.setMrnNo(mrnNo);
 
             // Save patient - only now after UserRole is successfully saved
- 
+
 
             Patient savedPatient = patientRepository.save(patient);
             PatientResponseDto responseDto =

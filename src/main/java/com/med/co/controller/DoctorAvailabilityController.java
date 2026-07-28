@@ -19,20 +19,20 @@ public class DoctorAvailabilityController {
     @Autowired
     private DoctorAvailabilityService doctorAvailabilityService;
 
-    // Add doctor availability
-    @PostMapping
+    // Create Doctor Availability
+    @PostMapping("/create")
     public ApiResponse<?> addAvailability(@RequestBody DoctorAvailabilityRequest request) {
         return doctorAvailabilityService.addAvailability(request);
     }
 
-    // Get all availability of a doctor
-    @GetMapping("/{doctorId}")
+    // Get Availability By Doctor Id
+    @GetMapping("/get/{doctorId}")
     public ApiResponse<?> getAvailabilityByDoctor(@PathVariable Long doctorId) {
         return doctorAvailabilityService.getAvailabilityByDoctor(doctorId);
     }
 
-    // Update availability
-    @PutMapping("/{availabilityId}")
+    // Update Availability
+    @PutMapping("/update/{availabilityId}")
     public ApiResponse<?> updateAvailability(
             @PathVariable Long availabilityId,
             @RequestBody DoctorAvailabilityRequest request) {
@@ -40,17 +40,22 @@ public class DoctorAvailabilityController {
         return doctorAvailabilityService.updateAvailability(availabilityId, request);
     }
 
-    // Delete availability
-    @DeleteMapping("/{availabilityId}")
+    // Delete Availability
+    @DeleteMapping("/delete/{availabilityId}")
     public ApiResponse<?> deleteAvailability(@PathVariable Long availabilityId) {
         return doctorAvailabilityService.deleteAvailability(availabilityId);
     }
 
-    // Count available doctors on a specific date
+    // Count Available Doctors
     @GetMapping("/available/count")
     public ResponseEntity<AvailableDoctorsCountResponse> countAvailableDoctors(
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        AvailableDoctorsCountResponse response = doctorAvailabilityService.countAvailableDoctorsOn(date);
+            @RequestParam("date")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate date) {
+
+        AvailableDoctorsCountResponse response =
+                doctorAvailabilityService.countAvailableDoctorsOn(date);
+
         return ResponseEntity.ok(response);
     }
 }

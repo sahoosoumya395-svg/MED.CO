@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import com.med.co.dto.request.DoctorAvailabilityRequest;
 import com.med.co.dto.response.ApiResponse;
@@ -21,7 +22,7 @@ public class DoctorAvailabilityController {
 
     // Create Doctor Availability
     @PostMapping("/create")
-    public ApiResponse<?> addAvailability(@RequestBody DoctorAvailabilityRequest request) {
+    public ApiResponse<?> addAvailability(@Valid @RequestBody DoctorAvailabilityRequest request) {
         return doctorAvailabilityService.addAvailability(request);
     }
 
@@ -35,7 +36,7 @@ public class DoctorAvailabilityController {
     @PutMapping("/update/{availabilityId}")
     public ApiResponse<?> updateAvailability(
             @PathVariable Long availabilityId,
-            @RequestBody DoctorAvailabilityRequest request) {
+            @Valid @RequestBody DoctorAvailabilityRequest request) {
 
         return doctorAvailabilityService.updateAvailability(availabilityId, request);
     }

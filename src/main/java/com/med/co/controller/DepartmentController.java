@@ -1,7 +1,9 @@
 package com.med.co.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import com.med.co.dto.request.DepartmentRequest;
 import com.med.co.dto.response.ApiResponse;
@@ -15,8 +17,8 @@ public class DepartmentController {
     private DepartmentService departmentService;
 
     // Create Department
-    @PostMapping("/create")
-    public ApiResponse<?> addDepartment(@RequestBody DepartmentRequest request) {
+    @PostMapping("/add-dept")
+    public ApiResponse<?> addDepartment(@Valid @RequestBody DepartmentRequest request) {
         return departmentService.addDepartment(request);
     }
 
@@ -35,7 +37,7 @@ public class DepartmentController {
     // Update Department
     @PutMapping("/update/{id}")
     public ApiResponse<?> updateDepartment(@PathVariable Long id,
-                                           @RequestBody DepartmentRequest request) {
+                                           @Valid @RequestBody DepartmentRequest request) {
         return departmentService.updateDepartment(id, request);
     }
 

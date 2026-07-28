@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,9 +34,10 @@ public class DoctorController {
 
     
 
+    
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<DoctorResponseDto>> registerDoctor(
-            @RequestBody DoctorRegistrationRequest request) {
+            @Valid @RequestBody DoctorRegistrationRequest request) {
 
         DoctorResponseDto doctor = doctorService.registerDoctor(request);
 
@@ -68,7 +70,7 @@ public class DoctorController {
     @PutMapping("/{id}")
     public ResponseEntity<DoctorResponseDto> updateDoctor(
             @PathVariable Long id,
-            @RequestBody DoctorRegistrationRequest request) {
+            @Valid @RequestBody DoctorRegistrationRequest request) {
 
         return ResponseEntity.ok(
                 doctorService.updateDoctor(id, request));

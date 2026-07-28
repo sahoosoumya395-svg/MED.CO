@@ -24,7 +24,7 @@ public class DoctorLeaveController {
 
     private final DoctorLeaveService doctorLeaveService;
 
-    @PostMapping
+    @PostMapping("/apply")
     public ResponseEntity<DoctorLeaveResponseDto> applyLeave(
             @Valid @RequestBody DoctorLeaveRequestDto request) {
 
@@ -33,7 +33,7 @@ public class DoctorLeaveController {
                 HttpStatus.CREATED);
     }
 
-    @GetMapping("/{leaveId}")
+    @GetMapping("/view/{leaveId}")
     public ResponseEntity<DoctorLeaveResponseDto> getLeaveById(
             @PathVariable Long leaveId) {
 
@@ -41,14 +41,14 @@ public class DoctorLeaveController {
                 doctorLeaveService.getLeaveById(leaveId));
     }
 
-    @GetMapping
+    @GetMapping("/view/all")
     public ResponseEntity<List<DoctorLeaveResponseDto>> getAllLeaves() {
 
         return ResponseEntity.ok(
                 doctorLeaveService.getAllLeaves());
     }
 
-    @GetMapping("/doctor/{doctorId}")
+    @GetMapping("/view/{doctorId}")
     public ResponseEntity<List<DoctorLeaveResponseDto>> getLeavesByDoctor(
             @PathVariable Long doctorId) {
 
@@ -56,7 +56,7 @@ public class DoctorLeaveController {
                 doctorLeaveService.getLeavesByDoctor(doctorId));
     }
 
-    @PutMapping("/{leaveId}")
+    @PutMapping("/own-update/{leaveId}")
     public ResponseEntity<DoctorLeaveResponseDto> updateLeave(
             @PathVariable Long leaveId,
             @Valid @RequestBody DoctorLeaveRequestDto request) {
@@ -65,7 +65,7 @@ public class DoctorLeaveController {
                 doctorLeaveService.updateLeave(leaveId, request));
     }
     
-    @PutMapping("/{leaveId}/status")
+    @PutMapping("/admin/{leaveId}/status")
     public ResponseEntity<DoctorLeaveResponseDto> updateLeaveStatus(
             @PathVariable Long leaveId,
             @RequestBody @Valid LeaveStatusRequestDto request) {
@@ -74,7 +74,7 @@ public class DoctorLeaveController {
                 doctorLeaveService.updateLeaveStatus(leaveId, request));
     }
 
-    @DeleteMapping("/{leaveId}")
+    @DeleteMapping("/delete/{leaveId}")
     public ResponseEntity<String> deleteLeave(
             @PathVariable Long leaveId) {
 
@@ -83,7 +83,7 @@ public class DoctorLeaveController {
         return ResponseEntity.ok("Doctor Leave deleted successfully.");
     }
     
-    @GetMapping("/count")
+    @GetMapping("/all-leave/count/date-wise")
     public ResponseEntity<Long> countDoctorsOnLeave(
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
@@ -102,7 +102,7 @@ public class DoctorLeaveController {
                 doctorLeaveService.countTotalLeaves());
     }
 
-    @GetMapping("/count/status/{status}")
+    @GetMapping("/count/status-wise")
     public ResponseEntity<Long> countLeavesByStatus(
             @PathVariable String status) {
 
@@ -116,7 +116,7 @@ public class DoctorLeaveController {
         }
     }
 
-    @GetMapping("/count/active")
+    @GetMapping("/count/active-leaves")
     public ResponseEntity<Long> countActiveLeaves() {
         return ResponseEntity.ok(
                 doctorLeaveService.countActiveLeaves());

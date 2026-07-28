@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import com.med.co.dto.request.AppointmentRequestDto;
 import com.med.co.dto.response.AppointmentResponseDto;
@@ -26,7 +27,7 @@ public class AppointmentController {
      */
     @PostMapping("/book")
     public ResponseEntity<AppointmentResponseDto> bookAppointment(
-            @RequestBody AppointmentRequestDto requestDto) {
+            @Valid @RequestBody AppointmentRequestDto requestDto) {
 
         AppointmentResponseDto response =
                 appointmentService.bookAppointment(requestDto);

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import com.med.co.dto.request.PrescriptionRequestDto;
 import com.med.co.dto.response.PrescriptionResponseDto;
@@ -22,7 +23,7 @@ public class PrescriptionController {
     // Create Prescription
     @PostMapping("/create")
     public ResponseEntity<PrescriptionResponseDto> createPrescription(
-            @RequestBody PrescriptionRequestDto requestDto) {
+            @Valid @RequestBody PrescriptionRequestDto requestDto) {
 
         PrescriptionResponseDto response =
                 prescriptionService.createPrescription(requestDto);

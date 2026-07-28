@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @RestController
 @RequestMapping("/api/billing")
@@ -49,6 +51,47 @@ public class BillingInvoiceController {
 		ApiResponse<List<BillingInvoiceResponseDto>> apiResponse = new ApiResponse<>(
 				200,
 				"All invoices retrieved successfully",
+				response);
+
+		return ResponseEntity.ok(apiResponse);
+	}
+
+	/**
+	 * Get billing invoice by invoice number
+	 * GET /api/billing/invoice-number/{invoiceNumber}
+	 */
+	@GetMapping("/invoice-number/{invoiceNumber}")
+	public ResponseEntity<ApiResponse<BillingInvoiceResponseDto>> getBillingInvoiceByInvoiceNumber(
+			@PathVariable String invoiceNumber) {
+
+		BillingInvoiceResponseDto response = billingInvoiceService.getBillingInvoiceByInvoiceNumber(invoiceNumber);
+
+		ApiResponse<BillingInvoiceResponseDto> apiResponse = new ApiResponse<>(
+				200,
+				"Invoice retrieved successfully",
+				response);
+
+		return ResponseEntity.ok(apiResponse);
+	}
+
+	/**
+	 * Get billing invoices by date
+	 * GET /api/billing/date/{invoiceDate} (format: yyyy-MM-dd)
+	 */
+	@GetMapping("/date/{invoiceDate}")
+	public ResponseEntity<ApiResponse<List<BillingInvoiceResponseDto>>> getBillingInvoicesByDate(
+			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate invoiceDate) {
+
+		List<BillingInvoiceResponseDto> response = billingInvoiceService.getBillingInvoicesByDate(invoiceDate);
+
+		String message = "Invoices retrieved successfully";
+		if (response == null || response.isEmpty()) {
+			message = "No billing data found for the requested date";
+		}
+
+		ApiResponse<List<BillingInvoiceResponseDto>> apiResponse = new ApiResponse<>(
+				200,
+				message,
 				response);
 
 		return ResponseEntity.ok(apiResponse);

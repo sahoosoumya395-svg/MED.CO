@@ -11,6 +11,10 @@ public interface BillingInvoiceService {
 
 	BillingInvoiceResponseDto getBillingInvoiceById(Long invoiceId);
 
+	BillingInvoiceResponseDto getBillingInvoiceByInvoiceNumber(String invoiceNumber);
+
+	java.util.List<BillingInvoiceResponseDto> getBillingInvoicesByDate(java.time.LocalDate invoiceDate);
+
 	List<BillingInvoiceResponseDto> getAllBillingInvoices();
 
 	void deleteBillingInvoice(Long invoiceId);

@@ -121,6 +121,38 @@ public class BillingInvoiceServiceImpl implements BillingInvoiceService {
 	}
 
 	@Override
+	public BillingInvoiceResponseDto getBillingInvoiceByInvoiceNumber(String invoiceNumber) {
+		BillingInvoice billingInvoice = billingInvoiceRepository.findByInvoiceNumber(invoiceNumber)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						"Billing invoice not found with invoice number: " + invoiceNumber));
+
+		return BillingInvoiceResponseDto.builder()
+				.id(billingInvoice.getInvoiceId())
+				.invoiceNumber(billingInvoice.getInvoiceNumber())
+				.patientId(billingInvoice.getPatientId())
+				.patientName(billingInvoice.getPatientName())
+				.invoiceDate(billingInvoice.getInvoiceDate())
+				.totalAmount(billingInvoice.getTotalAmount())
+				.build();
+	}
+
+	@Override
+	public List<BillingInvoiceResponseDto> getBillingInvoicesByDate(LocalDate invoiceDate) {
+		List<BillingInvoice> invoices = billingInvoiceRepository.findByInvoiceDate(invoiceDate);
+
+		return invoices.stream()
+				.map(invoice -> BillingInvoiceResponseDto.builder()
+						.id(invoice.getInvoiceId())
+						.invoiceNumber(invoice.getInvoiceNumber())
+						.patientId(invoice.getPatientId())
+						.patientName(invoice.getPatientName())
+						.invoiceDate(invoice.getInvoiceDate())
+						.totalAmount(invoice.getTotalAmount())
+						.build())
+				.collect(Collectors.toList());
+	}
+
+	@Override
 	public List<BillingInvoiceResponseDto> getAllBillingInvoices() {
 		List<BillingInvoice> invoices = billingInvoiceRepository.findAll();
 		return invoices.stream()

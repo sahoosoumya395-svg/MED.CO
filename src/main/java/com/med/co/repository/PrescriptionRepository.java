@@ -24,4 +24,7 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
     // Get all prescriptions written by a doctor
     List<Prescription> findByDoctorId(Long doctorId);
 
+    // Get prescription by patient's MRN number
+    Optional<Prescription> findByPatientMrnNo(String mrnNo);
+
 }

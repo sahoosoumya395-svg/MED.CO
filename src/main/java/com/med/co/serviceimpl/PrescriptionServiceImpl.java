@@ -11,6 +11,7 @@ import com.med.co.entity.Prescription;
 import com.med.co.repository.AppointmentRepository;
 import com.med.co.repository.PrescriptionRepository;
 import com.med.co.service.PrescriptionService;
+import com.med.co.util.PrescriptionHtmlGenerator;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,6 +35,12 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             throw new RuntimeException("Prescription already exists for this appointment");
         }
 
+        // Generate Dynamic HTML
+        String prescriptionHtml =
+                PrescriptionHtmlGenerator.generatePrescriptionHtml(
+                        appointment,
+                        requestDto);
+
         // Create Prescription
         Prescription prescription = Prescription.builder()
                 .appointment(appointment)
@@ -42,10 +49,11 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                 .diagnosis(requestDto.getDiagnosis())
                 .medicines(requestDto.getMedicines())
                 .advice(requestDto.getAdvice())
-        
+                .prescriptionHtml(prescriptionHtml)
                 .build();
 
-        Prescription savedPrescription = prescriptionRepository.save(prescription);
+        Prescription savedPrescription =
+                prescriptionRepository.save(prescription);
 
         return mapToResponse(savedPrescription);
     }
@@ -70,6 +78,16 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         Prescription prescription = prescriptionRepository.findByAppointment(appointment)
                 .orElseThrow(() ->
                         new RuntimeException("Prescription not found"));
+
+        return mapToResponse(prescription);
+    }
+
+    @Override
+    public PrescriptionResponseDto getPrescriptionByMrnNo(String mrnNo) {
+
+        Prescription prescription = prescriptionRepository.findByPatientMrnNo(mrnNo)
+                .orElseThrow(() ->
+                        new RuntimeException("Prescription not found for MRN No: " + mrnNo));
 
         return mapToResponse(prescription);
     }
@@ -109,32 +127,21 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         return PrescriptionResponseDto.builder()
                 .prescriptionId(prescription.getPrescriptionId())
-
-                .appointmentId(
-                        prescription.getAppointment().getAppointmentId())
-
-                .doctorId(
-                        prescription.getDoctor().getId())
-
+                .appointmentId(prescription.getAppointment().getAppointmentId())
+                .doctorId(prescription.getDoctor().getId())
                 .doctorName(
-                        prescription.getDoctor().getFirstName()
-                                + " "
+                        prescription.getDoctor().getFirstName() + " "
                                 + prescription.getDoctor().getLastName())
-
-                .patientId(
-                        prescription.getPatient().getPatientId())
-
+                .patientId(prescription.getPatient().getPatientId())
                 .patientName(
-                        prescription.getPatient().getFirstName()
-                                + " "
+                        prescription.getPatient().getFirstName() + " "
                                 + prescription.getPatient().getLastName())
-
+                .mrnNo(prescription.getPatient().getMrnNo())
                 .diagnosis(prescription.getDiagnosis())
                 .medicines(prescription.getMedicines())
                 .advice(prescription.getAdvice())
                 .prescriptionHtml(prescription.getPrescriptionHtml())
                 .createdAt(prescription.getCreatedAt())
-
                 .build();
     }
 }

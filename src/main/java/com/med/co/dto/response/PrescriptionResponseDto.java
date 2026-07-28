@@ -23,12 +23,16 @@ public class PrescriptionResponseDto {
     private Long patientId;
     private String patientName;
 
+    // Patient Medical Record Number
+    private String mrnNo;
+
     private String diagnosis;
 
     private String medicines;
 
     private String advice;
 
+    // Stored HTML of the prescription
     private String prescriptionHtml;
 
     private LocalDateTime createdAt;

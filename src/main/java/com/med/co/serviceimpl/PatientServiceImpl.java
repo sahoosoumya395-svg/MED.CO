@@ -2,6 +2,7 @@ package com.med.co.serviceimpl;
 
 import java.util.List;
 
+
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,11 +25,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-<<<<<<< HEAD
+
 import java.util.Random;
-=======
+
 import org.springframework.transaction.annotation.Transactional;
->>>>>>> 4ba08ee761e699a388f6a166f856e18bdccfe8bf
 
 @Service
 @RequiredArgsConstructor
@@ -69,16 +69,12 @@ public class PatientServiceImpl implements PatientService {
             // Link the saved UserRole to patient
             patient.setUserrole(savedUser);
 
-<<<<<<< HEAD
             // Generate MRN
             String mrnNo = generateMrnNo();
             patient.setMrnNo(mrnNo);
-=======
             // Save patient - only now after UserRole is successfully saved
             Patient savedPatient = patientRepository.save(patient);
->>>>>>> 4ba08ee761e699a388f6a166f856e18bdccfe8bf
 
-            Patient savedPatient = patientRepository.save(patient);
             PatientResponseDto responseDto =
                     modelMapper.map(savedPatient, PatientResponseDto.class);
 

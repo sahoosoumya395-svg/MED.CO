@@ -17,7 +17,7 @@ public class OpenApiConfig {
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("HEALTH BREIDGE")
+                        .title("HEALTH BRIEDGE")
                         .version("1.0")
                         .description("REST API documentation for Employee Portal with JWT authentication"))
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))

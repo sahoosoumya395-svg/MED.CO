@@ -50,7 +50,7 @@ public class AppointmentController {
     /**
      * Get Appointment By Id
      */
-    @GetMapping("/{appointmentId}")
+    @GetMapping("/get/{appointmentId}")
     public ResponseEntity<AppointmentResponseDto> getAppointmentById(
             @PathVariable Long appointmentId) {
 
@@ -63,7 +63,7 @@ public class AppointmentController {
     /**
      * Get All Appointments Of Doctor
      */
-    @GetMapping("/doctor/{doctorId}")
+    @GetMapping("/doctor/get/{doctorId}")
     public ResponseEntity<List<AppointmentResponseDto>> getAppointmentsByDoctor(
             @PathVariable Long doctorId) {
 
@@ -76,7 +76,7 @@ public class AppointmentController {
     /**
      * Get All Appointments Of Patient
      */
-    @GetMapping("/patient/{patientId}")
+    @GetMapping("/patient/get/{patientId}")
     public ResponseEntity<List<AppointmentResponseDto>> getAppointmentsByPatient(
             @PathVariable Long patientId) {
 
@@ -89,7 +89,7 @@ public class AppointmentController {
     /**
      * Get Available Dates For Doctor
      */
-    @GetMapping("/available-dates/{doctorId}")
+    @GetMapping("/available-dates/get/{doctorId}")
     public ResponseEntity<List<LocalDate>> getAvailableDates(
             @PathVariable Long doctorId) {
 
@@ -102,7 +102,7 @@ public class AppointmentController {
     /**
      * Get Available Time Slots
      */
-    @GetMapping("/available-slots")
+    @GetMapping("/available-slots/get")
     public ResponseEntity<List<LocalTime>> getAvailableTimeSlots(
             @RequestParam Long doctorId,
             @RequestParam LocalDate appointmentDate) {

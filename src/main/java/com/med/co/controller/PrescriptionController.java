@@ -19,7 +19,8 @@ public class PrescriptionController {
 
     private final PrescriptionService prescriptionService;
 
-    @PostMapping
+    // Create Prescription
+    @PostMapping("/create")
     public ResponseEntity<PrescriptionResponseDto> createPrescription(
             @RequestBody PrescriptionRequestDto requestDto) {
 
@@ -29,7 +30,12 @@ public class PrescriptionController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{prescriptionId}")
+
+    // Get Prescription By Id
+    @GetMapping("/get/{prescriptionId}")
+
+  
+
     public ResponseEntity<PrescriptionResponseDto> getPrescriptionById(
             @PathVariable Long prescriptionId) {
 
@@ -39,7 +45,12 @@ public class PrescriptionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/appointment/{appointmentId}")
+
+    // Get Prescription By Appointment
+    @GetMapping("/appointment/get/{appointmentId}")
+
+
+
     public ResponseEntity<PrescriptionResponseDto> getPrescriptionByAppointment(
             @PathVariable Long appointmentId) {
 
@@ -48,6 +59,10 @@ public class PrescriptionController {
 
         return ResponseEntity.ok(response);
     }
+
+
+    // Get Prescriptions By Patient
+  
 
     // NEW API - Fetch prescription using MRN No
     @GetMapping("/mrn/{mrnNo}")
@@ -61,6 +76,7 @@ public class PrescriptionController {
     }
 
     @GetMapping("/patient/{patientId}")
+
     public ResponseEntity<List<PrescriptionResponseDto>> getPrescriptionsByPatient(
             @PathVariable Long patientId) {
 
@@ -70,7 +86,12 @@ public class PrescriptionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/doctor/{doctorId}")
+
+    // Get Prescriptions By Doctor
+    @GetMapping("/doctor/get/{doctorId}")
+
+    
+
     public ResponseEntity<List<PrescriptionResponseDto>> getPrescriptionsByDoctor(
             @PathVariable Long doctorId) {
 
@@ -80,7 +101,12 @@ public class PrescriptionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+
+    // Get All Prescriptions
+    @GetMapping("/getAll")
+
+    
+
     public ResponseEntity<List<PrescriptionResponseDto>> getAllPrescriptions() {
 
         List<PrescriptionResponseDto> response =

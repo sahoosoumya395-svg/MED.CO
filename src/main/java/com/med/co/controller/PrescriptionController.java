@@ -30,8 +30,12 @@ public class PrescriptionController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+
     // Get Prescription By Id
     @GetMapping("/get/{prescriptionId}")
+
+  
+
     public ResponseEntity<PrescriptionResponseDto> getPrescriptionById(
             @PathVariable Long prescriptionId) {
 
@@ -41,8 +45,12 @@ public class PrescriptionController {
         return ResponseEntity.ok(response);
     }
 
+
     // Get Prescription By Appointment
     @GetMapping("/appointment/get/{appointmentId}")
+
+
+
     public ResponseEntity<PrescriptionResponseDto> getPrescriptionByAppointment(
             @PathVariable Long appointmentId) {
 
@@ -52,8 +60,23 @@ public class PrescriptionController {
         return ResponseEntity.ok(response);
     }
 
+
     // Get Prescriptions By Patient
-    @GetMapping("/patient/get/{patientId}")
+  
+
+    // NEW API - Fetch prescription using MRN No
+    @GetMapping("/mrn/{mrnNo}")
+    public ResponseEntity<PrescriptionResponseDto> getPrescriptionByMrnNo(
+            @PathVariable String mrnNo) {
+
+        PrescriptionResponseDto response =
+                prescriptionService.getPrescriptionByMrnNo(mrnNo);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/patient/{patientId}")
+
     public ResponseEntity<List<PrescriptionResponseDto>> getPrescriptionsByPatient(
             @PathVariable Long patientId) {
 
@@ -63,8 +86,12 @@ public class PrescriptionController {
         return ResponseEntity.ok(response);
     }
 
+
     // Get Prescriptions By Doctor
     @GetMapping("/doctor/get/{doctorId}")
+
+    
+
     public ResponseEntity<List<PrescriptionResponseDto>> getPrescriptionsByDoctor(
             @PathVariable Long doctorId) {
 
@@ -74,8 +101,12 @@ public class PrescriptionController {
         return ResponseEntity.ok(response);
     }
 
+
     // Get All Prescriptions
     @GetMapping("/getAll")
+
+    
+
     public ResponseEntity<List<PrescriptionResponseDto>> getAllPrescriptions() {
 
         List<PrescriptionResponseDto> response =

@@ -29,7 +29,7 @@ public class SecurityConfig {
 
                        
                         
-                        // Public APIs
+                        
                         .requestMatchers(
                                 "/api/patient/**",
                                 "/api/doctors/**",
@@ -48,7 +48,7 @@ public class SecurityConfig {
                                 
                         ).permitAll()
 
-                        // Swagger APIs
+                        
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
@@ -57,7 +57,7 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
 
-                        // All other APIs require authentication
+                       
                         .anyRequest().authenticated()
                 )
 

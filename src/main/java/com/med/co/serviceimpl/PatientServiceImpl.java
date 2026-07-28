@@ -172,7 +172,15 @@ public class PatientServiceImpl implements PatientService {
         }
     }
 
-       
+    @Override
+    public ApiResponse<?> countAllPatients() {
+        try {
+            long count = patientRepository.count();
+            return new ApiResponse<>(200, "Total patient count", count);
+        } catch (Exception e) {
+            return new ApiResponse<>(500, e.getMessage(), null);
+        }
+    }
 
     @Override
     public ApiResponse<?> deletePatient(Long patientId) {

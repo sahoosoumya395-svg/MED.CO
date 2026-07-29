@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+
 import java.util.List;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,7 +27,7 @@ public class BillingInvoiceController {
 	 * Create a new billing invoice
 	 * POST /api/billing
 	 */
-	@PostMapping
+	@PostMapping("/create/invoice")
 	public ResponseEntity<ApiResponse<BillingInvoiceResponseDto>> createBillingInvoice(
 			@Valid @RequestBody BillingInvoiceRequestDto requestDto) {
 
@@ -43,7 +45,7 @@ public class BillingInvoiceController {
 	 * Get all billing invoices
 	 * GET /api/billing
 	 */
-	@GetMapping
+	@GetMapping("/all-invoices")
 	public ResponseEntity<ApiResponse<List<BillingInvoiceResponseDto>>> getAllBillingInvoices() {
 
 		List<BillingInvoiceResponseDto> response = billingInvoiceService.getAllBillingInvoices();
@@ -60,7 +62,7 @@ public class BillingInvoiceController {
 	 * Get billing invoice by invoice number
 	 * GET /api/billing/invoice-number/{invoiceNumber}
 	 */
-	@GetMapping("/invoice-number/{invoiceNumber}")
+	@GetMapping("/show/using-invoiceNumber")
 	public ResponseEntity<ApiResponse<BillingInvoiceResponseDto>> getBillingInvoiceByInvoiceNumber(
 			@PathVariable String invoiceNumber) {
 
@@ -78,7 +80,7 @@ public class BillingInvoiceController {
 	 * Get billing invoices by date
 	 * GET /api/billing/date/{invoiceDate} (format: yyyy-MM-dd)
 	 */
-	@GetMapping("/date/{invoiceDate}")
+	@GetMapping("/show/using-invoiceDate")
 	public ResponseEntity<ApiResponse<List<BillingInvoiceResponseDto>>> getBillingInvoicesByDate(
 			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate invoiceDate) {
 
@@ -101,8 +103,9 @@ public class BillingInvoiceController {
 	 * Get billing invoice by ID
 	 * GET /api/billing/{id}
 	 */
-	@GetMapping("/{id}")
+	@GetMapping("/show-bill/id-wise")
 	public ResponseEntity<ApiResponse<BillingInvoiceResponseDto>> getBillingInvoiceById(
+			@Positive(message = "Invoice ID must be greater than 0")
 			@PathVariable Long id) {
 
 		BillingInvoiceResponseDto response = billingInvoiceService.getBillingInvoiceById(id);
@@ -119,7 +122,7 @@ public class BillingInvoiceController {
 	 * Delete billing invoice by ID
 	 * DELETE /api/billing/{id}
 	 */
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/delete/id-wise")
 	public ResponseEntity<ApiResponse<Void>> deleteBillingInvoice(@PathVariable Long id) {
 
 		billingInvoiceService.deleteBillingInvoice(id);

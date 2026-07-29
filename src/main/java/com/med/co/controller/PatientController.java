@@ -6,6 +6,8 @@ import com.med.co.dto.request.PatientRegistrationRequest;
 import com.med.co.dto.response.ApiResponse;
 import com.med.co.service.PatientService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/patient")
 public class PatientController {
@@ -17,7 +19,7 @@ public class PatientController {
     }
 
     @PostMapping("/register")
-    public ApiResponse<?> registerPatient(@RequestBody PatientRegistrationRequest request) {
+    public ApiResponse<?> registerPatient(@Valid @RequestBody PatientRegistrationRequest request) {
         return patientService.registerPatient(request);
     }
 
@@ -42,8 +44,10 @@ public class PatientController {
     }
 
     @PutMapping("/update/{id}")
-    public ApiResponse<?> updatePatient(@PathVariable Long id,
-                                        @RequestBody PatientRegistrationRequest request) {
+    public ApiResponse<?> updatePatient(
+            @PathVariable Long id,
+            @Valid @RequestBody PatientRegistrationRequest request) {
+
         return patientService.updatePatient(id, request);
     }
 

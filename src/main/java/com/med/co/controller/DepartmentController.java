@@ -1,7 +1,9 @@
 package com.med.co.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import com.med.co.dto.request.DepartmentRequest;
 import com.med.co.dto.response.ApiResponse;
@@ -14,36 +16,40 @@ public class DepartmentController {
     @Autowired
     private DepartmentService departmentService;
 
-    @PostMapping
-    public ApiResponse<?> addDepartment(@RequestBody DepartmentRequest request) {
+    // Create Department
+    @PostMapping("/add-dept")
+    public ApiResponse<?> addDepartment(@Valid @RequestBody DepartmentRequest request) {
         return departmentService.addDepartment(request);
     }
 
-    @GetMapping
+    // Get All Departments
+    @GetMapping("/getAll")
     public ApiResponse<?> getAllDepartments() {
         return departmentService.getAllDepartments();
     }
 
-    @GetMapping("/{id}")
+    // Get Department By Id
+    @GetMapping("/get/{id}")
     public ApiResponse<?> getDepartmentById(@PathVariable Long id) {
         return departmentService.getDepartmentById(id);
     }
 
-    @PutMapping("/{id}")
+    // Update Department
+    @PutMapping("/update/{id}")
     public ApiResponse<?> updateDepartment(@PathVariable Long id,
-                                           @RequestBody DepartmentRequest request) {
+                                           @Valid @RequestBody DepartmentRequest request) {
         return departmentService.updateDepartment(id, request);
     }
 
-    @DeleteMapping("/{id}")
+    // Delete Department
+    @DeleteMapping("/delete/{id}")
     public ApiResponse<?> deleteDepartment(@PathVariable Long id) {
         return departmentService.deleteDepartment(id);
     }
-    
+
+    // Get Total Departments Count
     @GetMapping("/count")
     public ApiResponse<?> getTotalDepartments() {
-
         return departmentService.getTotalDepartments();
-
     }
 }

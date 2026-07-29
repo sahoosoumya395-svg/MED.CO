@@ -3,18 +3,10 @@ package com.med.co.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import com.med.co.dto.request.DoctorUpdateRequest;
+import org.springframework.web.bind.annotation.*;
+
 import com.med.co.dto.request.DoctorRegistrationRequest;
+import com.med.co.dto.request.DoctorUpdateRequest;
 import com.med.co.dto.response.DoctorResponseDto;
 import com.med.co.service.DoctorService;
 
@@ -25,64 +17,61 @@ import jakarta.validation.Valid;
 @CrossOrigin("*")
 public class DoctorController {
 
-	private final DoctorService doctorService;
+    private final DoctorService doctorService;
 
-	public DoctorController(DoctorService doctorService) {
-		this.doctorService = doctorService;
-	}
+    public DoctorController(DoctorService doctorService) {
+        this.doctorService = doctorService;
+    }
 
-	// Register Doctor
-	@PostMapping("/register")
-	public ResponseEntity<DoctorResponseDto> registerDoctor(@Valid @RequestBody DoctorRegistrationRequest request) {
+    // Register Doctor
+    @PostMapping("/register")
+    public ResponseEntity<DoctorResponseDto> registerDoctor(
+            @Valid @RequestBody DoctorRegistrationRequest request) {
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(doctorService.registerDoctor(request));
-	}
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(doctorService.registerDoctor(request));
+    }
 
-	// Get All Doctors with Pagination and Sorting
-	@GetMapping("/all")
-	public ResponseEntity<Page<DoctorResponseDto>> getAllDoctors(
+    // Get All Doctors with Pagination and Sorting
+    @GetMapping("/all")
+    public ResponseEntity<Page<DoctorResponseDto>> getAllDoctors(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "firstName") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
 
-			@RequestParam(defaultValue = "0") int page,
+        return ResponseEntity.ok(
+                doctorService.getAllDoctors(page, size, sortBy, direction));
+    }
 
-			@RequestParam(defaultValue = "5") int size,
+    // Get Doctor By Id
+    @GetMapping("/{id}")
+    public ResponseEntity<DoctorResponseDto> getDoctorById(@PathVariable Long id) {
 
-			@RequestParam(defaultValue = "firstName") String sortBy,
+        return ResponseEntity.ok(doctorService.getDoctorById(id));
+    }
 
-			@RequestParam(defaultValue = "asc") String direction) {
+    // Update Doctor
+    @PutMapping("/{id}")
+    public ResponseEntity<DoctorResponseDto> updateDoctor(
+            @PathVariable Long id,
+            @Valid @RequestBody DoctorUpdateRequest request) {
 
-		return ResponseEntity.ok(doctorService.getAllDoctors(page, size, sortBy, direction));
-	}
+        return ResponseEntity.ok(doctorService.updateDoctor(id, request));
+    }
 
-	// Get Doctor By Id
-	@GetMapping("/{id}")
-	public ResponseEntity<DoctorResponseDto> getDoctorById(@PathVariable Long id) {
+    // Delete Doctor
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteDoctor(@PathVariable Long id) {
 
-		return ResponseEntity.ok(doctorService.getDoctorById(id));
-	}
+        return ResponseEntity.ok(doctorService.deleteDoctor(id));
+    }
 
-	// Update Doctor
-	@PutMapping("/{id}")
-	public ResponseEntity<DoctorResponseDto> updateDoctor(
-	        @PathVariable Long id,
-	        @Valid @RequestBody DoctorUpdateRequest request) {
+    // Count Total Doctors
+    @GetMapping("/count")
+    public ResponseEntity<Long> getTotalDoctors() {
 
-		return ResponseEntity.ok(doctorService.updateDoctor(id, request));
-	}
-
-	// Delete Doctor
-	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteDoctor(
-
-			@PathVariable Long id) {
-
-		return ResponseEntity.ok(doctorService.deleteDoctor(id));
-	}
-
-	// Count Total Doctors
-	@GetMapping("/count")
-	public ResponseEntity<Long> getTotalDoctors() {
-
-		return ResponseEntity.ok(doctorService.getTotalDoctors());
-	}
-
+        return ResponseEntity.ok(doctorService.getTotalDoctors());
+    }
 }

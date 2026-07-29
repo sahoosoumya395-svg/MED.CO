@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class LeaveStatusRequestDto {
 
-    @NotNull
+    @NotNull(message = "Leave status is required")
     private LeaveStatus status;
 
 }

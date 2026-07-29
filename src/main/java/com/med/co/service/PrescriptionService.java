@@ -23,6 +23,11 @@ public interface PrescriptionService {
     PrescriptionResponseDto getPrescriptionByAppointment(Long appointmentId);
 
     /**
+     * Get prescription by Patient MRN Number
+     */
+    PrescriptionResponseDto getPrescriptionByMrnNo(String mrnNo);
+
+    /**
      * Get all prescriptions of a Patient
      */
     List<PrescriptionResponseDto> getPrescriptionsByPatient(Long patientId);

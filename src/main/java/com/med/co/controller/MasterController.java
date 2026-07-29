@@ -15,27 +15,26 @@ public class MasterController {
 
     private final MasterService masterService;
 
-    // Get all master records
-    @GetMapping("/all")
+    // Get All Master Records
+    @GetMapping("/getAll")
     public ResponseEntity<?> getAllMasters() {
         return ResponseEntity.ok(masterService.getAllMasters());
     }
 
-    // Get master record by ID
-    @GetMapping("/{id}")
+    // Get Master Record By Id
+    @GetMapping("/get/{id}")
     public ResponseEntity<?> getMasterById(@PathVariable Long id) {
         return ResponseEntity.ok(masterService.getMasterById(id));
     }
-    
-    
-    @GetMapping("/mrn/{mrnNo}")
+
+    // Get Master Record By MRN Number
+    @GetMapping("/get/mrn/{mrnNo}")
     public ResponseEntity<?> getByMrn(@PathVariable String mrnNo) {
         return ResponseEntity.ok(masterService.getByMrn(mrnNo));
     }
-    
 
-    // Delete master record (Optional)
-    @DeleteMapping("/{id}")
+    // Delete Master Record
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteMaster(@PathVariable Long id) {
         return ResponseEntity.ok(masterService.deleteMaster(id));
     }

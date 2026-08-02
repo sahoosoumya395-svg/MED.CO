@@ -62,7 +62,6 @@ public class AuthServiceImpl implements AuthService {
         // ==========================
         // Validate Captcha First
         // ==========================
-
         boolean validCaptcha = captchaService.validateCaptcha(
                 request.getCaptchaId(),
                 request.getCaptcha());
@@ -72,9 +71,27 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // ==========================
+        // Check User & Password
+        // ==========================
+        UserRole user = userRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("User Not Found"));
+
+        System.out.println("==========================================");
+        System.out.println("Email            : " + request.getEmail());
+        System.out.println("Entered Password : " + request.getPassword());
+        System.out.println("Stored Hash      : " + user.getPassword());
+
+        boolean matches = passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword());
+
+        System.out.println("Password Matches : " + matches);
+        System.out.println("==========================================");
+
+        // ==========================
         // Authenticate User
         // ==========================
-
         Authentication authentication =
                 authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
@@ -84,12 +101,7 @@ public class AuthServiceImpl implements AuthService {
         // ==========================
         // Generate JWT Token
         // ==========================
-
         String token = jwtUtils.generateJwtToken(authentication);
-
-        UserRole user = userRepository
-                .findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("User Not Found"));
 
         LoginResponse response = new LoginResponse(
                 user.getRole().getRoleName().name(),
@@ -102,7 +114,8 @@ public class AuthServiceImpl implements AuthService {
         return new ApiResponse<>(
                 200,
                 "Login Successful",
-                response);
+                response
+        );
     }
 
     private String generateOtp() {

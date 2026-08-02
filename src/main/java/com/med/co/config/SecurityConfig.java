@@ -13,7 +13,8 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
+            throws Exception {
         return configuration.getAuthenticationManager();
     }
 
@@ -22,46 +23,33 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.disable())
 
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                .authorizeHttpRequests(auth -> auth
+            .authorizeHttpRequests(auth -> auth
 
-                       
-                        
-                        
-                        .requestMatchers(
-                                "/api/patient/**",
-                                "/api/doctors/**",
-                                "/api/departments/**",
-                                "/api/doctor-availability/**",
-                                "/api/auth/**",
-                                "/api/doctor-leaves/**",
-                                "/api/appointments/**",
+                .requestMatchers(
+                    "/api/patient/**",
+                    "/api/doctors/**",
+                    "/api/departments/**",
+                    "/api/doctor-availability/**",
+                    "/api/auth/**",
+                    "/api/doctor-leaves/**",
+                    "/api/appointments/**",
+                    "/api/prescriptions/**",
+                    "/api/billing/**",
 
-                                "/api/prescriptions/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/webjars/**",
+                    "/error"
+                ).permitAll()
 
-                                
-                                "/api/billing/**"
-                                
+                .anyRequest().authenticated()
+            )
 
-                                
-                        ).permitAll()
-
-                        
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/webjars/**",
-                                "/error"
-                        ).permitAll()
-
-                       
-                        .anyRequest().authenticated()
-                )
-
-                .httpBasic(Customizer.withDefaults());
+            .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }

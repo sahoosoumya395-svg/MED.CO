@@ -11,6 +11,7 @@ import com.med.co.service.DepartmentService;
 
 @RestController
 @RequestMapping("/api/departments")
+@CrossOrigin(origins = "http://localhost:4200")
 public class DepartmentController {
 
     @Autowired

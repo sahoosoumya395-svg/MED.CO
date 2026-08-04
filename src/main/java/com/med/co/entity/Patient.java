@@ -89,7 +89,6 @@ public class Patient {
     private Double weight;
 
     private String visionStatus;
-
     @Positive(message = "Body temperature must be greater than 0")
     private Double bodyTemperature;
 

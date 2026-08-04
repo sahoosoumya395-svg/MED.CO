@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/patient")
+@CrossOrigin(origins = "http://localhost:4200")
 public class PatientController {
 
     private final PatientService patientService;
@@ -63,4 +64,13 @@ public class PatientController {
     public ApiResponse<?> deletePatient(@PathVariable Long id) {
         return patientService.deletePatient(id);
     }
+    
+    @GetMapping("/mrn/{mrnNo}")
+    public ApiResponse<?> getPatientByMrn(@PathVariable String mrnNo) {
+        return patientService.getPatientByMrn(mrnNo);
+    }
+    
+    
+    
+    
 }

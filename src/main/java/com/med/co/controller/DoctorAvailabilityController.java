@@ -15,6 +15,7 @@ import com.med.co.service.DoctorAvailabilityService;
 
 @RestController
 @RequestMapping("/api/doctor-availability")
+@CrossOrigin(origins = "http://localhost:4200")
 public class DoctorAvailabilityController {
 
     @Autowired

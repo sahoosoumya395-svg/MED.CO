@@ -35,6 +35,7 @@ import com.med.co.repository.UserRepository;
 import com.med.co.service.DoctorService;
 
 import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -150,7 +151,6 @@ public class DoctorServiceImpl implements DoctorService {
 
 		return mapDoctorToResponse(savedDoctor);
 	}
-
 	// Get Doctor By Id
 	@Override
 	public DoctorResponseDto getDoctorById(Long id) {
@@ -188,6 +188,27 @@ public class DoctorServiceImpl implements DoctorService {
 
 		return doctorPage.map(this::mapDoctorToResponse);
 	}
+	
+	
+	@Override
+	public List<DoctorResponseDto> getDoctorsByDepartment(Long departmentId) {
+
+	    List<Doctor> doctors =
+	            doctorRepository.findByDepartmentDepartmentId(departmentId);
+
+	    return doctors.stream()
+	            .map(this::mapDoctorToResponse)
+	            .toList();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	// Update Doctor
 	@Transactional
@@ -306,4 +327,12 @@ public class DoctorServiceImpl implements DoctorService {
 
         return doctorRepository.count();
     }
+	
+	
+	
+	
+	
+	
+	
+	
 }

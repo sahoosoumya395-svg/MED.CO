@@ -141,6 +141,58 @@ public class PatientServiceImpl implements PatientService {
                     null);
         }
     }
+    
+    
+    @Override
+    public ApiResponse<?> getPatientByMrn(String mrnNo) {
+
+        try {
+
+            Patient patient = patientRepository.findByMrnNo(mrnNo)
+                    .orElseThrow(() -> new ResourceNotFoundException("Patient Not Found"));
+
+            PatientResponseDto responseDto =
+                    modelMapper.map(patient, PatientResponseDto.class);
+
+            return new ApiResponse<>(200,
+                    "Patient Found",
+                    responseDto);
+
+        } catch (Exception e) {
+
+            return new ApiResponse<>(404,
+                    e.getMessage(),
+                    null);
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     @Override
     public ApiResponse<?> updatePatient(Long patientId, PatientRegistrationRequest request) {

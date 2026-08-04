@@ -21,6 +21,8 @@ import com.med.co.entity.PasswordResetOtp;
 import com.med.co.entity.UserRole;
 import com.med.co.exception.BadRequestException;
 import com.med.co.repository.PasswordResetOtpRepository;
+import com.med.co.repository.PatientRepository;
+import com.med.co.repository.DoctorRepository;
 import com.med.co.repository.UserRepository;
 import com.med.co.security.JwtUtils;
 import com.med.co.service.AuthService;
@@ -55,6 +57,8 @@ public class AuthServiceImpl implements AuthService {
 
     private final CaptchaService captchaService;
     private final RevokedTokenRepository revokedTokenRepository;
+    private final PatientRepository patientRepository;
+    private final DoctorRepository doctorRepository;
 
     @Override
     public ApiResponse<?> login(LoginRequest request) {
@@ -70,6 +74,8 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Invalid or Expired Captcha");
         }
 
+        String rawPassword = com.med.co.util.EncryptionUtil.decrypt(request.getPassword());
+
         // ==========================
         // Check User & Password
         // ==========================
@@ -79,11 +85,11 @@ public class AuthServiceImpl implements AuthService {
 
         System.out.println("==========================================");
         System.out.println("Email            : " + request.getEmail());
-        System.out.println("Entered Password : " + request.getPassword());
+        System.out.println("Entered Password (decrypted) : " + rawPassword);
         System.out.println("Stored Hash      : " + user.getPassword());
 
         boolean matches = passwordEncoder.matches(
-                request.getPassword(),
+                rawPassword,
                 user.getPassword());
 
         System.out.println("Password Matches : " + matches);
@@ -96,15 +102,32 @@ public class AuthServiceImpl implements AuthService {
                 authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
                                 request.getEmail(),
-                                request.getPassword()));
+                                rawPassword));
 
         // ==========================
         // Generate JWT Token
         // ==========================
         String token = jwtUtils.generateJwtToken(authentication);
 
+        // ==========================
+        // Fetch User Name based on Role
+        // ==========================
+        String name = "";
+        if ("PATIENT".equals(user.getRole().getRoleName().name())) {
+            name = patientRepository.findByUserrole(user)
+                    .map(p -> p.getFirstName() + " " + p.getLastName())
+                    .orElse("Patient");
+        } else if ("DOCTOR".equals(user.getRole().getRoleName().name())) {
+            name = doctorRepository.findByUserrole(user)
+                    .map(d -> d.getFirstName() + " " + d.getLastName())
+                    .orElse("Doctor");
+        } else {
+            name = "Admin";
+        }
+
         LoginResponse response = new LoginResponse(
                 user.getRole().getRoleName().name(),
+                name,
                 "Bearer",
                 token,
                 jwtUtils.getJwtExpirationMs(),

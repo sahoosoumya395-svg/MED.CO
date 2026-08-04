@@ -45,6 +45,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             LocalTime appointmentTime,
             AppointmentStatus status);
 
+    // Count all appointments on a particular date
+    long countByAppointmentDate(LocalDate appointmentDate);
+
     // Get all appointments by status
     List<Appointment> findByStatus(AppointmentStatus status);
 

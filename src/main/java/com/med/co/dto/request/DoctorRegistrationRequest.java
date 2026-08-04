@@ -44,7 +44,6 @@ public class DoctorRegistrationRequest {
     private LocalDate dateOfBirth;
 
     @NotBlank(message = "Blood group is required")
-    @Pattern(regexp = "^(A|B|AB|O)[+-]$", message = "Blood group must be A+, A-, B+, B-, AB+, AB-, O+ or O-")
     private String bloodGroup;
 
     @NotBlank(message = "Nationality is required")

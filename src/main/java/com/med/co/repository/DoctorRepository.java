@@ -8,6 +8,7 @@ import com.med.co.entity.Doctor;
 @Repository
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
+    java.util.Optional<Doctor> findByUserrole(com.med.co.entity.UserRole userrole);
 
     boolean existsByEmail(String email);
 

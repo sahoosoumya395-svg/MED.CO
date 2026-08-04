@@ -2,6 +2,7 @@ package com.med.co.controller;
 
 import org.springframework.web.bind.annotation.*;
 
+import com.med.co.dto.request.DepartmentPatientCountRequest;
 import com.med.co.dto.request.PatientRegistrationRequest;
 import com.med.co.dto.response.ApiResponse;
 import com.med.co.service.PatientService;
@@ -37,6 +38,13 @@ public class PatientController {
     @GetMapping("/count")
     public ApiResponse<?> countAllPatients() {
         return patientService.countAllPatients();
+    }
+
+    @PostMapping("/count-by-department")
+    public ApiResponse<?> countPatientsByDepartment(
+            @Valid @RequestBody DepartmentPatientCountRequest request) {
+
+        return patientService.countPatientsByDepartment(request);
     }
 
     @GetMapping("/{id}")

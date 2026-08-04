@@ -117,4 +117,13 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Count All Appointments Today
+     */
+    @GetMapping("/count/today")
+    public ResponseEntity<Long> countAppointmentsToday() {
+        long count = appointmentService.countAppointmentsToday();
+        return ResponseEntity.ok(count);
+    }
+
 }

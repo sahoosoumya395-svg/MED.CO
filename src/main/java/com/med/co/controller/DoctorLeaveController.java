@@ -48,7 +48,7 @@ public class DoctorLeaveController {
                 doctorLeaveService.getAllLeaves());
     }
 
-    @GetMapping("/view/{doctorId}")
+    @GetMapping("/doctor/{doctorId}")
     public ResponseEntity<List<DoctorLeaveResponseDto>> getLeavesByDoctor(
             @PathVariable Long doctorId) {
 

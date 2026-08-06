@@ -135,19 +135,19 @@ public class DoctorServiceImpl implements DoctorService {
 
 		doctor.setStatus(DoctorStatus.AVAILABLE);
 
-		Doctor savedDoctor = doctorRepository.save(doctor);
-
 		UserRole user = new UserRole();
 
 		user.setEmail(request.getEmail().trim().toLowerCase());
-
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
-
 		user.setEnabled(true);
-
 		user.setRole(role);
 
-		userRepository.save(user);
+		UserRole savedUser = userRepository.save(user);
+
+		// Link Doctor and User
+		doctor.setUserrole(savedUser);
+
+		Doctor savedDoctor = doctorRepository.save(doctor);
 
 		return mapDoctorToResponse(savedDoctor);
 	}

@@ -49,6 +49,11 @@ public class DoctorRegistrationRequest {
     @NotBlank(message = "Nationality is required")
     @Pattern(regexp = "^[A-Za-z ]+$", message = "Nationality should contain only alphabets")
     private String nationality;
+    
+    @NotNull(message = "Registration Access Code is required")
+    @Min(value = 7, message = "Invalid Registration Access Code")
+    @Max(value = 7, message = "Invalid Registration Access Code")
+    private Integer registrationCode;
 
     @NotBlank(message = "Mobile number is required")
     @Pattern(regexp = "^[6-9]\\d{9}$", message = "Mobile number must be a valid 10-digit Indian mobile number")

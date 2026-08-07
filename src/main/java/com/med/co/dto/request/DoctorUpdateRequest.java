@@ -71,7 +71,11 @@ public class DoctorUpdateRequest {
 
     @NotBlank(message = "Nationality is required")
     private String nationality;
-
+    
+    @NotNull(message = "Registration Access Code is required")
+    @Min(value = 7, message = "Invalid Registration Access Code")
+    @Max(value = 7, message = "Invalid Registration Access Code")
+    private Integer registrationCode;
 
     @NotBlank(message = "Mobile number is required")
     @Pattern(

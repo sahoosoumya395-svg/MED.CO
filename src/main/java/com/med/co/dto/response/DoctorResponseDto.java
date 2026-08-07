@@ -23,6 +23,7 @@ public class DoctorResponseDto {
     private LocalDate dateOfBirth;
     private String bloodGroup;
     private String nationality;
+    private Integer registrationCode;
 
     private String mobileNumber;
     private String alternateMobileNumber;

@@ -35,6 +35,7 @@ import com.med.co.repository.UserRepository;
 import com.med.co.service.DoctorService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import java.util.List;
 
 @Service
@@ -52,11 +53,16 @@ public class DoctorServiceImpl implements DoctorService {
 	private final ModelMapper modelMapper;
 
 	private final PasswordEncoder passwordEncoder;
+	
+	@Value("${doctor.registration.code}")
+    private Integer registrationAccessCode;
 
 	// Register Doctor
 	@Transactional
 	@Override
 	public DoctorResponseDto registerDoctor(DoctorRegistrationRequest request) {
+		
+		System.out.println("Request Registration Code = " + request.getRegistrationCode());
 
 		// Email validation
 		if (userRepository.existsByEmail(request.getEmail())) {
@@ -82,6 +88,11 @@ public class DoctorServiceImpl implements DoctorService {
 
 			throw new BadRequestException("Alternate mobile number cannot be same as primary mobile number");
 		}
+		
+		// Registration Access Code validation
+		if (!registrationAccessCode.equals(request.getRegistrationCode())) {
+		    throw new BadRequestException("Invalid Registration Access Code");
+		}
 
 		Role role = roleRepository.findByRoleName(RoleType.DOCTOR)
 				.orElseThrow(() -> new ResourceNotFoundException("Doctor role not found"));
@@ -104,6 +115,8 @@ public class DoctorServiceImpl implements DoctorService {
 		doctor.setBloodGroup(request.getBloodGroup());
 
 		doctor.setNationality(request.getNationality().trim());
+		
+		doctor.setRegistrationCode(request.getRegistrationCode());
 
 		doctor.setMobileNumber(request.getMobileNumber());
 
@@ -249,6 +262,11 @@ public class DoctorServiceImpl implements DoctorService {
 		// Department validation
 		Department department = departmentRepository.findById(request.getDepartmentId())
 				.orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+		
+		// Registration Access Code validation
+		if (!registrationAccessCode.equals(request.getRegistrationCode())) {
+		    throw new BadRequestException("Invalid Registration Access Code");
+		}
 
 		// Updating Doctor Details
 
@@ -265,7 +283,10 @@ public class DoctorServiceImpl implements DoctorService {
 		existingDoctor.setBloodGroup(request.getBloodGroup());
 
 		existingDoctor.setNationality(request.getNationality().trim());
-
+		
+		existingDoctor.setRegistrationCode(request.getRegistrationCode());
+		System.out.println("Doctor Entity Registration Code = " + existingDoctor.getRegistrationCode());
+		
 		existingDoctor.setMobileNumber(request.getMobileNumber());
 
 		existingDoctor.setAlternateMobileNumber(request.getAlternateMobileNumber());

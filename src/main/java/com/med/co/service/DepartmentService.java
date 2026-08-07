@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.med.co.dto.request.DepartmentRequest;
 import com.med.co.dto.response.ApiResponse;
+import com.med.co.dto.response.DepartmentAvailabilityResponseDto;
 
 public interface DepartmentService {
 
@@ -18,4 +19,5 @@ public interface DepartmentService {
     ApiResponse deleteDepartment(Long departmentId);
     
     ApiResponse<?> getTotalDepartments();
+    List<DepartmentAvailabilityResponseDto> getDepartmentAvailability();
 }

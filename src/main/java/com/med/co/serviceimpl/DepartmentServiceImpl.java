@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.med.co.dto.request.DepartmentRequest;
 import com.med.co.dto.response.ApiResponse;
+import com.med.co.dto.response.DepartmentAvailabilityResponseDto;
 import com.med.co.dto.response.DepartmentResponse;
 import com.med.co.entity.Department;
 import com.med.co.repository.DepartmentRepository;
@@ -23,6 +24,13 @@ public class DepartmentServiceImpl implements DepartmentService {
     private final DepartmentRepository departmentRepository;
     private final ModelMapper modelMapper;
 
+    @Override
+    public List<DepartmentAvailabilityResponseDto> getDepartmentAvailability() {
+
+        return departmentRepository.getDepartmentAvailability();
+
+    }
+    
     @Override
     public ApiResponse<DepartmentResponse> addDepartment(DepartmentRequest request) {
         try {

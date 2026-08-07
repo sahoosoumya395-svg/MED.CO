@@ -34,7 +34,7 @@ public class DoctorController {
     }
 
     // Get All Doctors with Pagination and Sorting
-    @GetMapping("/all")
+    @GetMapping("/view/all")
     public ResponseEntity<Page<DoctorResponseDto>> getAllDoctors(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
@@ -46,14 +46,14 @@ public class DoctorController {
     }
 
     // Get Doctor By Id
-    @GetMapping("/{id}")
+    @GetMapping("/view/{id}")
     public ResponseEntity<DoctorResponseDto> getDoctorById(@PathVariable Long id) {
 
         return ResponseEntity.ok(doctorService.getDoctorById(id));
     }
 
     // Update Doctor
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<DoctorResponseDto> updateDoctor(
             @PathVariable Long id,
             @Valid @RequestBody DoctorUpdateRequest request) {
@@ -62,7 +62,7 @@ public class DoctorController {
     }
 
     // Delete Doctor
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteDoctor(@PathVariable Long id) {
 
         return ResponseEntity.ok(doctorService.deleteDoctor(id));

@@ -1,10 +1,12 @@
 package com.med.co.serviceimpl;
 
 import com.med.co.dto.request.BillingInvoiceRequestDto;
-import com.med.co.dto.request.MedicineDto;
+import com.med.co.dto.request.DateRangeBillingRequestDto;
 import com.med.co.dto.response.BillingInvoiceResponseDto;
+import com.med.co.dto.response.DateRangeBillingSummaryDto;
 import com.med.co.dto.response.DoctorConsultationResponseDto;
 import com.med.co.dto.response.MedicineResponseDto;
+import com.med.co.dto.response.MonthlyBillingSummaryDto;
 import com.med.co.entity.BillingInvoice;
 import com.med.co.exception.ResourceNotFoundException;
 import com.med.co.repository.BillingInvoiceRepository;
@@ -109,7 +111,6 @@ public class BillingInvoiceServiceImpl implements BillingInvoiceService {
 				.orElseThrow(() -> new ResourceNotFoundException(
 						"Billing invoice not found with id: " + invoiceId));
 
-		// Reconstruct response (in a real scenario, you might want to store more details)
 		return BillingInvoiceResponseDto.builder()
 				.id(billingInvoice.getInvoiceId())
 				.invoiceNumber(billingInvoice.getInvoiceNumber())
@@ -165,6 +166,62 @@ public class BillingInvoiceServiceImpl implements BillingInvoiceService {
 						.totalAmount(invoice.getTotalAmount())
 						.build())
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public MonthlyBillingSummaryDto getCurrentMonthBillingSummary() {
+		LocalDate today = LocalDate.now();
+		LocalDate firstDayOfMonth = today.withDayOfMonth(1);
+
+		List<BillingInvoice> invoices = billingInvoiceRepository
+				.findByInvoiceDateBetween(firstDayOfMonth, today);
+
+		List<BillingInvoiceResponseDto> invoiceDtos = invoices.stream()
+				.map(invoice -> BillingInvoiceResponseDto.builder()
+						.id(invoice.getInvoiceId())
+						.invoiceNumber(invoice.getInvoiceNumber())
+						.patientId(invoice.getPatientId())
+						.patientName(invoice.getPatientName())
+						.invoiceDate(invoice.getInvoiceDate())
+						.totalAmount(invoice.getTotalAmount())
+						.build())
+				.collect(Collectors.toList());
+
+		BigDecimal totalAmountSum = invoices.stream()
+				.map(BillingInvoice::getTotalAmount)
+				.reduce(BigDecimal.ZERO, BigDecimal::add)
+				.setScale(2, RoundingMode.HALF_UP);
+
+		return MonthlyBillingSummaryDto.builder()
+				.startDate(firstDayOfMonth)
+				.endDate(today)
+				.totalInvoicesCount(invoices.size())
+				.totalAmount(totalAmountSum)
+				.invoices(invoiceDtos)
+				.build();
+	}
+
+	@Override
+	public DateRangeBillingSummaryDto getBillingSummaryByDateRange(DateRangeBillingRequestDto requestDto) {
+		if (requestDto.getFromDate().isAfter(requestDto.getToDate())) {
+			throw new IllegalArgumentException("fromDate cannot be after toDate");
+		}
+
+		BigDecimal totalAmount = billingInvoiceRepository.calculateTotalAmountBetweenDates(
+				requestDto.getFromDate(),
+				requestDto.getToDate());
+
+		if (totalAmount == null) {
+			totalAmount = BigDecimal.ZERO;
+		}
+
+		totalAmount = totalAmount.setScale(2, RoundingMode.HALF_UP);
+
+		return DateRangeBillingSummaryDto.builder()
+				.fromDate(requestDto.getFromDate())
+				.toDate(requestDto.getToDate())
+				.totalAmount(totalAmount)
+				.build();
 	}
 
 	@Override

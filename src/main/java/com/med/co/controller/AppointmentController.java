@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/appointments")
+@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 public class AppointmentController {
 
@@ -114,6 +115,15 @@ public class AppointmentController {
                         appointmentDate);
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Count All Appointments Today
+     */
+    @GetMapping("/count/today")
+    public ResponseEntity<Long> countAppointmentsToday() {
+        long count = appointmentService.countAppointmentsToday();
+        return ResponseEntity.ok(count);
     }
 
 }

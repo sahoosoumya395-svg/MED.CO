@@ -1,8 +1,11 @@
 package com.med.co.controller;
 
 import com.med.co.dto.request.BillingInvoiceRequestDto;
+import com.med.co.dto.request.DateRangeBillingRequestDto;
 import com.med.co.dto.response.ApiResponse;
 import com.med.co.dto.response.BillingInvoiceResponseDto;
+import com.med.co.dto.response.DateRangeBillingSummaryDto;
+import com.med.co.dto.response.MonthlyBillingSummaryDto;
 import com.med.co.service.BillingInvoiceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +28,7 @@ public class BillingInvoiceController {
 
 	/**
 	 * Create a new billing invoice
-	 * POST /api/billing
+	 * POST /api/billing/create/invoice
 	 */
 	@PostMapping("/create/invoice")
 	public ResponseEntity<ApiResponse<BillingInvoiceResponseDto>> createBillingInvoice(
@@ -42,8 +45,43 @@ public class BillingInvoiceController {
 	}
 
 	/**
+	 * Calculate current month billing summary (1st day of month to today)
+	 * GET /api/billing/calculate/current-month
+	 */
+	@GetMapping("/calculate/current-month")
+	public ResponseEntity<ApiResponse<MonthlyBillingSummaryDto>> getCurrentMonthBillingSummary() {
+
+		MonthlyBillingSummaryDto response = billingInvoiceService.getCurrentMonthBillingSummary();
+
+		ApiResponse<MonthlyBillingSummaryDto> apiResponse = new ApiResponse<>(
+				200,
+				"Current month billing summary calculated successfully",
+				response);
+
+		return ResponseEntity.ok(apiResponse);
+	}
+
+	/**
+	 * Calculate total billing payments between two dates
+	 * POST /api/billing/calculate/by-date-range
+	 */
+	@PostMapping("/calculate/by-date-range")
+	public ResponseEntity<ApiResponse<DateRangeBillingSummaryDto>> getBillingSummaryByDateRange(
+			@Valid @RequestBody DateRangeBillingRequestDto requestDto) {
+
+		DateRangeBillingSummaryDto response = billingInvoiceService.getBillingSummaryByDateRange(requestDto);
+
+		ApiResponse<DateRangeBillingSummaryDto> apiResponse = new ApiResponse<>(
+				200,
+				"Date range billing summary calculated successfully",
+				response);
+
+		return ResponseEntity.ok(apiResponse);
+	}
+
+	/**
 	 * Get all billing invoices
-	 * GET /api/billing
+	 * GET /api/billing/all-invoices
 	 */
 	@GetMapping("/all-invoices")
 	public ResponseEntity<ApiResponse<List<BillingInvoiceResponseDto>>> getAllBillingInvoices() {
@@ -60,11 +98,11 @@ public class BillingInvoiceController {
 
 	/**
 	 * Get billing invoice by invoice number
-	 * GET /api/billing/invoice-number/{invoiceNumber}
+	 * GET /api/billing/show/using-invoiceNumber
 	 */
 	@GetMapping("/show/using-invoiceNumber")
 	public ResponseEntity<ApiResponse<BillingInvoiceResponseDto>> getBillingInvoiceByInvoiceNumber(
-			@PathVariable String invoiceNumber) {
+			@RequestParam String invoiceNumber) {
 
 		BillingInvoiceResponseDto response = billingInvoiceService.getBillingInvoiceByInvoiceNumber(invoiceNumber);
 
@@ -78,11 +116,11 @@ public class BillingInvoiceController {
 
 	/**
 	 * Get billing invoices by date
-	 * GET /api/billing/date/{invoiceDate} (format: yyyy-MM-dd)
+	 * GET /api/billing/show/using-invoiceDate
 	 */
 	@GetMapping("/show/using-invoiceDate")
 	public ResponseEntity<ApiResponse<List<BillingInvoiceResponseDto>>> getBillingInvoicesByDate(
-			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate invoiceDate) {
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate invoiceDate) {
 
 		List<BillingInvoiceResponseDto> response = billingInvoiceService.getBillingInvoicesByDate(invoiceDate);
 
@@ -101,9 +139,9 @@ public class BillingInvoiceController {
 
 	/**
 	 * Get billing invoice by ID
-	 * GET /api/billing/{id}
+	 * GET /api/billing/show-bill/id-wise/{id}
 	 */
-	@GetMapping("/show-bill/id-wise")
+	@GetMapping("/show-bill/id-wise/{id}")
 	public ResponseEntity<ApiResponse<BillingInvoiceResponseDto>> getBillingInvoiceById(
 			@Positive(message = "Invoice ID must be greater than 0")
 			@PathVariable Long id) {
@@ -120,9 +158,9 @@ public class BillingInvoiceController {
 
 	/**
 	 * Delete billing invoice by ID
-	 * DELETE /api/billing/{id}
+	 * DELETE /api/billing/delete/id-wise/{id}
 	 */
-	@DeleteMapping("/delete/id-wise")
+	@DeleteMapping("/delete/id-wise/{id}")
 	public ResponseEntity<ApiResponse<Void>> deleteBillingInvoice(@PathVariable Long id) {
 
 		billingInvoiceService.deleteBillingInvoice(id);

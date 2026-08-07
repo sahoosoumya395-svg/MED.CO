@@ -18,6 +18,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -114,6 +115,7 @@ public class Doctor {
 
 	// Doctor Status
 
+	@Builder.Default
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private DoctorStatus status = DoctorStatus.AVAILABLE;
@@ -135,5 +137,9 @@ public class Doctor {
 	@JsonIgnore
 	@OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<DoctorLeave> leaves;
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
+	private UserRole userrole;
 
 }

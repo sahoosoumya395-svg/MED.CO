@@ -23,4 +23,6 @@ public interface AppointmentService {
 
     List<LocalTime> getAvailableTimeSlots(Long doctorId, LocalDate appointmentDate);
 
+    long countAppointmentsToday();
+
 }

@@ -1,5 +1,6 @@
 package com.med.co.service;
 
+import com.med.co.dto.request.DepartmentPatientCountRequest;
 import com.med.co.dto.request.PatientRegistrationRequest;
 import com.med.co.dto.response.ApiResponse;
 
@@ -11,9 +12,13 @@ public interface PatientService {
 
     ApiResponse<?> getPatientById(Long patientId);
 
+    ApiResponse<?> getPatientByMrn(String mrnNo);   // <-- Add this line
+
     ApiResponse<?> updatePatient(Long patientId, PatientRegistrationRequest request);
 
     ApiResponse<?> deletePatient(Long patientId);
 
     ApiResponse<?> countAllPatients();
+
+    ApiResponse<?> countPatientsByDepartment(DepartmentPatientCountRequest request);
 }

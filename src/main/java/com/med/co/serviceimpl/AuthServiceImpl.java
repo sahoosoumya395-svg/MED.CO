@@ -3,6 +3,7 @@ package com.med.co.serviceimpl;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
+import com.med.co.entity.Doctor;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +22,8 @@ import com.med.co.entity.PasswordResetOtp;
 import com.med.co.entity.UserRole;
 import com.med.co.exception.BadRequestException;
 import com.med.co.repository.PasswordResetOtpRepository;
+import com.med.co.repository.PatientRepository;
+import com.med.co.repository.DoctorRepository;
 import com.med.co.repository.UserRepository;
 import com.med.co.security.JwtUtils;
 import com.med.co.service.AuthService;
@@ -55,6 +58,8 @@ public class AuthServiceImpl implements AuthService {
 
     private final CaptchaService captchaService;
     private final RevokedTokenRepository revokedTokenRepository;
+    private final PatientRepository patientRepository;
+    private final DoctorRepository doctorRepository;
 
     @Override
     public ApiResponse<?> login(LoginRequest request) {
@@ -62,7 +67,6 @@ public class AuthServiceImpl implements AuthService {
         // ==========================
         // Validate Captcha First
         // ==========================
-
         boolean validCaptcha = captchaService.validateCaptcha(
                 request.getCaptchaId(),
                 request.getCaptcha());
@@ -71,38 +75,89 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Invalid or Expired Captcha");
         }
 
-        // ==========================
-        // Authenticate User
-        // ==========================
-
-        Authentication authentication =
-                authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                request.getEmail(),
-                                request.getPassword()));
+        String rawPassword = com.med.co.util.EncryptionUtil.decrypt(request.getPassword());
 
         // ==========================
-        // Generate JWT Token
+        // Check User & Password
         // ==========================
-
-        String token = jwtUtils.generateJwtToken(authentication);
-
         UserRole user = userRepository
                 .findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadRequestException("User Not Found"));
 
+        System.out.println("==========================================");
+        System.out.println("Email            : " + request.getEmail());
+        System.out.println("Entered Password (decrypted) : " + rawPassword);
+        System.out.println("Stored Hash      : " + user.getPassword());
+
+        boolean matches = passwordEncoder.matches(
+                rawPassword,
+                user.getPassword());
+
+        System.out.println("Password Matches : " + matches);
+        System.out.println("==========================================");
+
+        // ==========================
+        // Authenticate User
+        // ==========================
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getEmail(),
+                                rawPassword));
+
+        // ==========================
+        // Generate JWT Token
+        // ==========================
+        String token = jwtUtils.generateJwtToken(authentication);
+
+        // ==========================
+        // Fetch User Name based on Role
+        // ==========================
+      
+        Long id = null;
+        String name = "";
+
+        if ("PATIENT".equals(user.getRole().getRoleName().name())) {
+
+            name = patientRepository.findByUserrole(user)
+                    .map(p -> p.getFirstName() + " " + p.getLastName())
+                    .orElse("Patient");
+
+        } else if ("DOCTOR".equals(user.getRole().getRoleName().name())) {
+
+        	Optional<Doctor> doctor = doctorRepository.findByUserrole(user);
+
+        	System.out.println("Logged-in User ID = " + user.getId());
+        	System.out.println("Doctor Found = " + doctor.isPresent());
+
+        	if (doctor.isPresent()) {
+        	    System.out.println("Doctor ID = " + doctor.get().getId());
+
+        	    id = doctor.get().getId();
+        	    name = doctor.get().getFirstName() + " " + doctor.get().getLastName();
+        	} else {
+        	    System.out.println("No doctor mapped to this user.");
+        	    name = "Doctor";
+        	}
+        } else {
+            name = "Admin";
+        }
         LoginResponse response = new LoginResponse(
+                id,
                 user.getRole().getRoleName().name(),
+                name,
                 "Bearer",
                 token,
                 jwtUtils.getJwtExpirationMs(),
                 jwtUtils.getJwtExpirationMinutes()
+        
         );
 
         return new ApiResponse<>(
                 200,
                 "Login Successful",
-                response);
+                response
+        );
     }
 
     private String generateOtp() {

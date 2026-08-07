@@ -60,4 +60,10 @@ public class PatientResponseDto {
     private Double bodyTemperature;
 
     private String hearingStatus;
+    
+    
+    
+    
+    
+    
 }

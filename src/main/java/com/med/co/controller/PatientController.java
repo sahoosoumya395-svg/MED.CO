@@ -2,6 +2,7 @@ package com.med.co.controller;
 
 import org.springframework.web.bind.annotation.*;
 
+import com.med.co.dto.request.DepartmentPatientCountRequest;
 import com.med.co.dto.request.PatientRegistrationRequest;
 import com.med.co.dto.response.ApiResponse;
 import com.med.co.service.PatientService;
@@ -10,6 +11,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/patient")
+@CrossOrigin(origins = "http://localhost:4200")
 public class PatientController {
 
     private final PatientService patientService;
@@ -38,6 +40,13 @@ public class PatientController {
         return patientService.countAllPatients();
     }
 
+    @PostMapping("/count-by-department")
+    public ApiResponse<?> countPatientsByDepartment(
+            @Valid @RequestBody DepartmentPatientCountRequest request) {
+
+        return patientService.countPatientsByDepartment(request);
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<?> getPatientById(@PathVariable Long id) {
         return patientService.getPatientById(id);
@@ -55,4 +64,13 @@ public class PatientController {
     public ApiResponse<?> deletePatient(@PathVariable Long id) {
         return patientService.deletePatient(id);
     }
+    
+    @GetMapping("/mrn/{mrnNo}")
+    public ApiResponse<?> getPatientByMrn(@PathVariable String mrnNo) {
+        return patientService.getPatientByMrn(mrnNo);
+    }
+    
+    
+    
+    
 }

@@ -1,16 +1,20 @@
 package com.med.co.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 import com.med.co.dto.request.DepartmentRequest;
 import com.med.co.dto.response.ApiResponse;
+import com.med.co.dto.response.DepartmentAvailabilityResponseDto;
 import com.med.co.service.DepartmentService;
 
 @RestController
 @RequestMapping("/api/departments")
+@CrossOrigin(origins = "http://localhost:4200")
 public class DepartmentController {
 
     @Autowired
@@ -51,5 +55,13 @@ public class DepartmentController {
     @GetMapping("/count")
     public ApiResponse<?> getTotalDepartments() {
         return departmentService.getTotalDepartments();
+    }
+    @GetMapping("/availability")
+    public ResponseEntity<List<DepartmentAvailabilityResponseDto>>
+    getDepartmentAvailability(){
+
+        return ResponseEntity.ok(
+                departmentService.getDepartmentAvailability());
+
     }
 }

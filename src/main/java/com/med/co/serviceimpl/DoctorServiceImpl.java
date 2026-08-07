@@ -36,6 +36,7 @@ import com.med.co.service.DoctorService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -147,23 +148,22 @@ public class DoctorServiceImpl implements DoctorService {
 
 		doctor.setStatus(DoctorStatus.AVAILABLE);
 
-		Doctor savedDoctor = doctorRepository.save(doctor);
-
 		UserRole user = new UserRole();
 
 		user.setEmail(request.getEmail().trim().toLowerCase());
-
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
-
 		user.setEnabled(true);
-
 		user.setRole(role);
 
-		userRepository.save(user);
+		UserRole savedUser = userRepository.save(user);
+
+		// Link Doctor and User
+		doctor.setUserrole(savedUser);
+
+		Doctor savedDoctor = doctorRepository.save(doctor);
 
 		return mapDoctorToResponse(savedDoctor);
 	}
-
 	// Get Doctor By Id
 	@Override
 	public DoctorResponseDto getDoctorById(Long id) {
@@ -201,6 +201,27 @@ public class DoctorServiceImpl implements DoctorService {
 
 		return doctorPage.map(this::mapDoctorToResponse);
 	}
+	
+	
+	@Override
+	public List<DoctorResponseDto> getDoctorsByDepartment(Long departmentId) {
+
+	    List<Doctor> doctors =
+	            doctorRepository.findByDepartmentDepartmentId(departmentId);
+
+	    return doctors.stream()
+	            .map(this::mapDoctorToResponse)
+	            .toList();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	// Update Doctor
 	@Transactional
@@ -327,4 +348,12 @@ public class DoctorServiceImpl implements DoctorService {
 
         return doctorRepository.count();
     }
+	
+	
+	
+	
+	
+	
+	
+	
 }

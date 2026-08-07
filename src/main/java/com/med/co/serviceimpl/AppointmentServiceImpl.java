@@ -248,6 +248,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public long countAppointmentsToday() {
+        return appointmentRepository.countByAppointmentDate(LocalDate.now());
+    }
+
+    @Override
     public List<LocalTime> getAvailableTimeSlots(Long doctorId,
                                                  LocalDate appointmentDate) {
 

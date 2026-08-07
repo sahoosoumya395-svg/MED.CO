@@ -15,6 +15,7 @@ import com.med.co.service.DoctorAvailabilityService;
 
 @RestController
 @RequestMapping("/api/doctor-availability")
+@CrossOrigin(origins = "http://localhost:4200")
 public class DoctorAvailabilityController {
 
     @Autowired
@@ -50,9 +51,13 @@ public class DoctorAvailabilityController {
     // Count Available Doctors
     @GetMapping("/available/count")
     public ResponseEntity<AvailableDoctorsCountResponse> countAvailableDoctors(
-            @RequestParam("date")
+            @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate date) {
+
+        if (date == null) {
+            date = LocalDate.now();
+        }
 
         AvailableDoctorsCountResponse response =
                 doctorAvailabilityService.countAvailableDoctorsOn(date);

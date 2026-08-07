@@ -7,14 +7,17 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.med.co.dto.request.DepartmentPatientCountRequest;
 import com.med.co.dto.request.PatientRegistrationRequest;
 import com.med.co.dto.response.ApiResponse;
+import com.med.co.dto.response.DepartmentPatientCountResponse;
 import com.med.co.dto.response.PatientResponseDto;
 import com.med.co.entity.Patient;
 import com.med.co.entity.Role;
 import com.med.co.entity.UserRole;
 import com.med.co.enums.Enums.RoleType;
 import com.med.co.exception.ResourceNotFoundException;
+import com.med.co.repository.DepartmentRepository;
 import com.med.co.repository.PatientRepository;
 import com.med.co.repository.RoleRepository;
 import com.med.co.repository.UserRepository;
@@ -27,7 +30,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import java.util.Random;
 
-
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -35,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PatientServiceImpl implements PatientService {
 
     private final PatientRepository patientRepository;
+    private final DepartmentRepository departmentRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final ModelMapper modelMapper;
@@ -141,6 +144,58 @@ public class PatientServiceImpl implements PatientService {
                     null);
         }
     }
+    
+    
+    @Override
+    public ApiResponse<?> getPatientByMrn(String mrnNo) {
+
+        try {
+
+            Patient patient = patientRepository.findByMrnNo(mrnNo)
+                    .orElseThrow(() -> new ResourceNotFoundException("Patient Not Found"));
+
+            PatientResponseDto responseDto =
+                    modelMapper.map(patient, PatientResponseDto.class);
+
+            return new ApiResponse<>(200,
+                    "Patient Found",
+                    responseDto);
+
+        } catch (Exception e) {
+
+            return new ApiResponse<>(404,
+                    e.getMessage(),
+                    null);
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     @Override
     public ApiResponse<?> updatePatient(Long patientId, PatientRegistrationRequest request) {
@@ -184,6 +239,25 @@ public class PatientServiceImpl implements PatientService {
         try {
             long count = patientRepository.count();
             return new ApiResponse<>(200, "Total patient count", count);
+        } catch (Exception e) {
+            return new ApiResponse<>(500, e.getMessage(), null);
+        }
+    }
+
+    @Override
+    public ApiResponse<?> countPatientsByDepartment(DepartmentPatientCountRequest request) {
+        try {
+            if (!departmentRepository.existsByDepartmentName(request.getDepartmentName())) {
+                return new ApiResponse<>(404, "Department '" + request.getDepartmentName() + "' not found", null);
+            }
+
+            long count = patientRepository.countPatientsByDepartmentName(request.getDepartmentName());
+            DepartmentPatientCountResponse response = new DepartmentPatientCountResponse(
+                    request.getDepartmentName(),
+                    count
+            );
+
+            return new ApiResponse<>(200, "Department patient count retrieved successfully", response);
         } catch (Exception e) {
             return new ApiResponse<>(500, e.getMessage(), null);
         }

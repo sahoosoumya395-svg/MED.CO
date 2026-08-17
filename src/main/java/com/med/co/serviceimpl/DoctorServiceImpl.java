@@ -1,4 +1,7 @@
+
 package com.med.co.serviceimpl;
+
+import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -35,304 +38,441 @@ import com.med.co.repository.UserRepository;
 import com.med.co.service.DoctorService;
 
 import lombok.RequiredArgsConstructor;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class DoctorServiceImpl implements DoctorService {
 
-	private final DoctorRepository doctorRepository;
+    private final DoctorRepository doctorRepository;
 
-	private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-	private final RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
-	private final DepartmentRepository departmentRepository;
+    private final DepartmentRepository departmentRepository;
 
-	private final ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
-	private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-	// Register Doctor
-	@Transactional
-	@Override
-	public DoctorResponseDto registerDoctor(DoctorRegistrationRequest request) {
 
-		// Email validation
-		if (userRepository.existsByEmail(request.getEmail())) {
+    // Register Doctor
+    @Transactional
+    @Override
+    public DoctorResponseDto registerDoctor(DoctorRegistrationRequest request) {
 
-			throw new ResourceAlreadyExistsException("Email already exists");
-		}
+        // Email validation
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ResourceAlreadyExistsException("Email already exists");
+        }
 
-		// Mobile validation
-		if (doctorRepository.existsByMobileNumber(request.getMobileNumber())) {
+        // Mobile validation
+        if (doctorRepository.existsByMobileNumber(request.getMobileNumber())) {
+            throw new ResourceAlreadyExistsException("Mobile number already exists");
+        }
 
-			throw new ResourceAlreadyExistsException("Mobile number already exists");
-		}
+        // Medical registration validation
+        if (doctorRepository.existsByMedicalRegistrationNumber(
+                request.getMedicalRegistrationNumber())) {
 
-		// Medical registration validation
-		if (doctorRepository.existsByMedicalRegistrationNumber(request.getMedicalRegistrationNumber())) {
+            throw new ResourceAlreadyExistsException(
+                    "Medical registration number already exists");
+        }
 
-			throw new ResourceAlreadyExistsException("Medical registration number already exists");
-		}
+        // Alternate mobile validation
+        if (request.getAlternateMobileNumber() != null
+                && !request.getAlternateMobileNumber().isBlank()
+                && request.getMobileNumber()
+                        .equals(request.getAlternateMobileNumber())) {
 
-		// Alternate mobile validation
-		if (request.getAlternateMobileNumber() != null && !request.getAlternateMobileNumber().isBlank()
-				&& request.getMobileNumber().equals(request.getAlternateMobileNumber())) {
+            throw new BadRequestException(
+                    "Alternate mobile number cannot be same as primary mobile number");
+        }
 
-			throw new BadRequestException("Alternate mobile number cannot be same as primary mobile number");
-		}
+        // Find DOCTOR role
+        Role role = roleRepository.findByRoleName(RoleType.DOCTOR)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Doctor role not found"));
 
-		Role role = roleRepository.findByRoleName(RoleType.DOCTOR)
-				.orElseThrow(() -> new ResourceNotFoundException("Doctor role not found"));
+        // Find department
+        Department department = departmentRepository
+                .findById(request.getDepartmentId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Department not found"));
 
-		Department department = departmentRepository.findById(request.getDepartmentId())
-				.orElseThrow(() -> new ResourceNotFoundException("Department not found"));
 
-		Doctor doctor = new Doctor();
+        // =========================
+        // CREATE USER ROLE FIRST
+        // =========================
 
-		doctor.setFirstName(request.getFirstName().trim());
+        UserRole user = new UserRole();
 
-		doctor.setMiddleName(request.getMiddleName() == null ? null : request.getMiddleName().trim());
+        user.setEmail(request.getEmail().trim().toLowerCase());
 
-		doctor.setLastName(request.getLastName().trim());
+        user.setPassword(
+                passwordEncoder.encode(request.getPassword())
+        );
 
-		doctor.setGender(request.getGender());
+        user.setEnabled(true);
 
-		doctor.setDateOfBirth(request.getDateOfBirth());
+        user.setRole(role);
 
-		doctor.setBloodGroup(request.getBloodGroup());
+        UserRole savedUser = userRepository.save(user);
 
-		doctor.setNationality(request.getNationality().trim());
 
-		doctor.setMobileNumber(request.getMobileNumber());
+        // =========================
+        // CREATE DOCTOR
+        // =========================
 
-		doctor.setAlternateMobileNumber(request.getAlternateMobileNumber());
+        Doctor doctor = new Doctor();
 
-		doctor.setEmail(request.getEmail().trim().toLowerCase());
+        doctor.setFirstName(request.getFirstName().trim());
 
-		doctor.setAddress(request.getAddress().trim());
+        doctor.setMiddleName(
+                request.getMiddleName() == null
+                        ? null
+                        : request.getMiddleName().trim()
+        );
 
-		doctor.setCity(request.getCity().trim());
+        doctor.setLastName(request.getLastName().trim());
 
-		doctor.setState(request.getState().trim());
+        doctor.setGender(request.getGender());
 
-		doctor.setCountry(request.getCountry().trim());
+        doctor.setDateOfBirth(request.getDateOfBirth());
 
-		doctor.setPinCode(request.getPinCode());
+        doctor.setBloodGroup(request.getBloodGroup());
 
-		doctor.setMedicalRegistrationNumber(request.getMedicalRegistrationNumber().trim());
+        doctor.setNationality(request.getNationality().trim());
 
-		doctor.setQualification(request.getQualification().trim());
+        doctor.setMobileNumber(request.getMobileNumber());
 
-		doctor.setSpecialization(request.getSpecialization().trim());
+        doctor.setAlternateMobileNumber(
+                request.getAlternateMobileNumber()
+        );
 
-		doctor.setExperience(request.getExperience());
+        doctor.setEmail(
+                request.getEmail().trim().toLowerCase()
+        );
 
-		doctor.setDesignation(request.getDesignation().trim());
+        doctor.setAddress(request.getAddress().trim());
 
-		doctor.setDepartment(department);
+        doctor.setCity(request.getCity().trim());
 
-		doctor.setStatus(DoctorStatus.AVAILABLE);
+        doctor.setState(request.getState().trim());
 
-		Doctor savedDoctor = doctorRepository.save(doctor);
+        doctor.setCountry(request.getCountry().trim());
 
-		UserRole user = new UserRole();
+        doctor.setPinCode(request.getPinCode());
 
-		user.setEmail(request.getEmail().trim().toLowerCase());
+        doctor.setMedicalRegistrationNumber(
+                request.getMedicalRegistrationNumber().trim()
+        );
 
-		user.setPassword(passwordEncoder.encode(request.getPassword()));
+        doctor.setQualification(
+                request.getQualification().trim()
+        );
 
-		user.setEnabled(true);
+        doctor.setSpecialization(
+                request.getSpecialization().trim()
+        );
 
-		user.setRole(role);
+        doctor.setExperience(request.getExperience());
 
-		userRepository.save(user);
+        doctor.setDesignation(
+                request.getDesignation().trim()
+        );
 
-		return mapDoctorToResponse(savedDoctor);
-	}
-	// Get Doctor By Id
-	@Override
-	public DoctorResponseDto getDoctorById(Long id) {
+        doctor.setDepartment(department);
 
-		Doctor doctor = doctorRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+        doctor.setStatus(DoctorStatus.AVAILABLE);
 
-		return mapDoctorToResponse(doctor);
-	}
 
-	// Common Response Mapping
-	private DoctorResponseDto mapDoctorToResponse(Doctor doctor) {
+        // =========================
+        // LINK DOCTOR WITH USER ROLE
+        // =========================
 
-		DoctorResponseDto response = modelMapper.map(doctor, DoctorResponseDto.class);
+        doctor.setUserrole(savedUser);
 
-		if (doctor.getDepartment() != null) {
 
-			response.setDepartmentId(doctor.getDepartment().getDepartmentId());
+        // Save doctor
+        Doctor savedDoctor = doctorRepository.save(doctor);
 
-			response.setDepartmentName(doctor.getDepartment().getDepartmentName());
-		}
 
-		return response;
-	}
+        // Return response
+        return mapDoctorToResponse(savedDoctor);
+    }
 
-	// Get All Doctors with Pagination and Sorting
-	@Override
-	public Page<DoctorResponseDto> getAllDoctors(int page, int size, String sortBy, String direction) {
 
-		Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+    // Get Doctor By Id
+    @Override
+    public DoctorResponseDto getDoctorById(Long id) {
 
-		Pageable pageable = PageRequest.of(page, size, sort);
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Doctor not found"));
 
-		Page<Doctor> doctorPage = doctorRepository.findAll(pageable);
+        return mapDoctorToResponse(doctor);
+    }
 
-		return doctorPage.map(this::mapDoctorToResponse);
-	}
-	
-	
-	@Override
-	public List<DoctorResponseDto> getDoctorsByDepartment(Long departmentId) {
 
-	    List<Doctor> doctors =
-	            doctorRepository.findByDepartmentDepartmentId(departmentId);
+    // Common Response Mapping
+    private DoctorResponseDto mapDoctorToResponse(Doctor doctor) {
 
-	    return doctors.stream()
-	            .map(this::mapDoctorToResponse)
-	            .toList();
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
+        DoctorResponseDto response =
+                modelMapper.map(doctor, DoctorResponseDto.class);
 
-	// Update Doctor
-	@Transactional
-	@Override
-	public DoctorResponseDto updateDoctor(
-	        Long id,
-	        DoctorUpdateRequest request) {
+        if (doctor.getDepartment() != null) {
 
-		Doctor existingDoctor = doctorRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+            response.setDepartmentId(
+                    doctor.getDepartment().getDepartmentId()
+            );
 
-		// Duplicate Email Validation
-		if (doctorRepository.existsByEmailAndIdNot(request.getEmail(), id)) {
+            response.setDepartmentName(
+                    doctor.getDepartment().getDepartmentName()
+            );
+        }
 
-			throw new ResourceAlreadyExistsException("Email already exists");
-		}
+        return response;
+    }
 
-		// Duplicate Mobile Validation
-		if (doctorRepository.existsByMobileNumberAndIdNot(request.getMobileNumber(), id)) {
 
-			throw new ResourceAlreadyExistsException("Mobile number already exists");
-		}
+    // Get All Doctors with Pagination and Sorting
+    @Override
+    public Page<DoctorResponseDto> getAllDoctors(
+            int page,
+            int size,
+            String sortBy,
+            String direction) {
 
-		// Duplicate Medical Registration Number Validation
-		if (doctorRepository.existsByMedicalRegistrationNumberAndIdNot(request.getMedicalRegistrationNumber(),
-				id)) {
+        Sort sort = direction.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
 
-			throw new ResourceAlreadyExistsException("Medical registration number already exists");
-		}
+        Pageable pageable =
+                PageRequest.of(page, size, sort);
 
-		// Alternate mobile validation
-		if (request.getAlternateMobileNumber() != null && !request.getAlternateMobileNumber().isBlank()
-				&& request.getMobileNumber().equals(request.getAlternateMobileNumber())) {
+        Page<Doctor> doctorPage =
+                doctorRepository.findAll(pageable);
 
-			throw new BadRequestException("Alternate mobile number cannot be same as primary mobile number");
-		}
+        return doctorPage.map(this::mapDoctorToResponse);
+    }
 
-		// Department validation
-		Department department = departmentRepository.findById(request.getDepartmentId())
-				.orElseThrow(() -> new ResourceNotFoundException("Department not found"));
 
-		// Updating Doctor Details
+    @Override
+    public List<DoctorResponseDto> getDoctorsByDepartment(
+            Long departmentId) {
 
-		existingDoctor.setFirstName(request.getFirstName().trim());
+        List<Doctor> doctors =
+                doctorRepository.findByDepartmentDepartmentId(
+                        departmentId
+                );
 
-		existingDoctor.setMiddleName(request.getMiddleName() == null ? null : request.getMiddleName().trim());
+        return doctors.stream()
+                .map(this::mapDoctorToResponse)
+                .toList();
+    }
 
-		existingDoctor.setLastName(request.getLastName().trim());
 
-		existingDoctor.setGender(request.getGender());
+    // Update Doctor
+    @Transactional
+    @Override
+    public DoctorResponseDto updateDoctor(
+            Long id,
+            DoctorUpdateRequest request) {
 
-		existingDoctor.setDateOfBirth(request.getDateOfBirth());
+        Doctor existingDoctor =
+                doctorRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Doctor not found"
+                                ));
 
-		existingDoctor.setBloodGroup(request.getBloodGroup());
 
-		existingDoctor.setNationality(request.getNationality().trim());
+        // Duplicate Email Validation
+        if (doctorRepository.existsByEmailAndIdNot(
+                request.getEmail(), id)) {
 
-		existingDoctor.setMobileNumber(request.getMobileNumber());
+            throw new ResourceAlreadyExistsException(
+                    "Email already exists"
+            );
+        }
 
-		existingDoctor.setAlternateMobileNumber(request.getAlternateMobileNumber());
 
-		existingDoctor.setEmail(request.getEmail().trim().toLowerCase());
+        // Duplicate Mobile Validation
+        if (doctorRepository.existsByMobileNumberAndIdNot(
+                request.getMobileNumber(), id)) {
 
-		existingDoctor.setAddress(request.getAddress().trim());
+            throw new ResourceAlreadyExistsException(
+                    "Mobile number already exists"
+            );
+        }
 
-		existingDoctor.setCity(request.getCity().trim());
 
-		existingDoctor.setState(request.getState().trim());
+        // Duplicate Medical Registration Number Validation
+        if (doctorRepository
+                .existsByMedicalRegistrationNumberAndIdNot(
+                        request.getMedicalRegistrationNumber(),
+                        id)) {
 
-		existingDoctor.setCountry(request.getCountry().trim());
+            throw new ResourceAlreadyExistsException(
+                    "Medical registration number already exists"
+            );
+        }
 
-		existingDoctor.setPinCode(request.getPinCode());
 
-		existingDoctor.setMedicalRegistrationNumber(request.getMedicalRegistrationNumber().trim());
+        // Alternate mobile validation
+        if (request.getAlternateMobileNumber() != null
+                && !request.getAlternateMobileNumber().isBlank()
+                && request.getMobileNumber()
+                        .equals(request.getAlternateMobileNumber())) {
 
-		existingDoctor.setQualification(request.getQualification().trim());
+            throw new BadRequestException(
+                    "Alternate mobile number cannot be same as primary mobile number"
+            );
+        }
 
-		existingDoctor.setSpecialization(request.getSpecialization().trim());
 
-		existingDoctor.setExperience(request.getExperience());
+        // Department validation
+        Department department =
+                departmentRepository.findById(
+                        request.getDepartmentId()
+                ).orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Department not found"
+                        ));
 
-		existingDoctor.setDesignation(request.getDesignation().trim());
 
-		existingDoctor.setDepartment(department);
+        // Updating Doctor Details
 
-		Doctor updatedDoctor = doctorRepository.save(existingDoctor);
+        existingDoctor.setFirstName(
+                request.getFirstName().trim()
+        );
 
-		return mapDoctorToResponse(updatedDoctor);
-	}
+        existingDoctor.setMiddleName(
+                request.getMiddleName() == null
+                        ? null
+                        : request.getMiddleName().trim()
+        );
 
-	// Delete Doctor
-	@Override
-	public String deleteDoctor(Long id) {
+        existingDoctor.setLastName(
+                request.getLastName().trim()
+        );
 
-		Doctor doctor = doctorRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+        existingDoctor.setGender(
+                request.getGender()
+        );
 
-		doctorRepository.delete(doctor);
+        existingDoctor.setDateOfBirth(
+                request.getDateOfBirth()
+        );
 
-		return "Doctor deleted successfully";
-	}
+        existingDoctor.setBloodGroup(
+                request.getBloodGroup()
+        );
 
-	// Update Leave Status
-	@Override
-	public DoctorLeaveResponseDto updateLeaveStatus(Long leaveId, LeaveStatusRequestDto request) {
+        existingDoctor.setNationality(
+                request.getNationality().trim()
+        );
 
-		// TODO:
-		// Implement when DoctorLeave approval workflow is added
+        existingDoctor.setMobileNumber(
+                request.getMobileNumber()
+        );
 
-		return null;
-	}
+        existingDoctor.setAlternateMobileNumber(
+                request.getAlternateMobileNumber()
+        );
 
-	// Count Total Doctors
-	@Override
+        existingDoctor.setEmail(
+                request.getEmail().trim().toLowerCase()
+        );
+
+        existingDoctor.setAddress(
+                request.getAddress().trim()
+        );
+
+        existingDoctor.setCity(
+                request.getCity().trim()
+        );
+
+        existingDoctor.setState(
+                request.getState().trim()
+        );
+
+        existingDoctor.setCountry(
+                request.getCountry().trim()
+        );
+
+        existingDoctor.setPinCode(
+                request.getPinCode()
+        );
+
+        existingDoctor.setMedicalRegistrationNumber(
+                request.getMedicalRegistrationNumber().trim()
+        );
+
+        existingDoctor.setQualification(
+                request.getQualification().trim()
+        );
+
+        existingDoctor.setSpecialization(
+                request.getSpecialization().trim()
+        );
+
+        existingDoctor.setExperience(
+                request.getExperience()
+        );
+
+        existingDoctor.setDesignation(
+                request.getDesignation().trim()
+        );
+
+        existingDoctor.setDepartment(
+                department
+        );
+
+
+        Doctor updatedDoctor =
+                doctorRepository.save(existingDoctor);
+
+        return mapDoctorToResponse(updatedDoctor);
+    }
+
+
+    // Delete Doctor
+    @Override
+    public String deleteDoctor(Long id) {
+
+        Doctor doctor =
+                doctorRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Doctor not found"
+                                ));
+
+        doctorRepository.delete(doctor);
+
+        return "Doctor deleted successfully";
+    }
+
+
+    // Update Leave Status
+    @Override
+    public DoctorLeaveResponseDto updateLeaveStatus(
+            Long leaveId,
+            LeaveStatusRequestDto request) {
+
+        // TODO:
+        // Implement when DoctorLeave approval workflow is added
+
+        return null;
+    }
+
+
+    // Count Total Doctors
+    @Override
     public long getTotalDoctors() {
 
         return doctorRepository.count();
     }
-	
-	
-	
-	
-	
-	
-	
-	
 }
+

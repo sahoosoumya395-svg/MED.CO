@@ -69,6 +69,19 @@ public class PatientController {
     public ApiResponse<?> getPatientByMrn(@PathVariable String mrnNo) {
         return patientService.getPatientByMrn(mrnNo);
     }
+    @GetMapping("/dashboard/{id}")
+    public ApiResponse<?> getPatientDashboard(
+            @PathVariable Long id) {
+
+        return patientService.getPatientDashboard(id);
+    }
+    
+    @GetMapping("/email/{email}")
+    public ApiResponse<?> getPatientByEmail(
+            @PathVariable String email) {
+
+        return patientService.getPatientByEmail(email);
+    }
     
     
     

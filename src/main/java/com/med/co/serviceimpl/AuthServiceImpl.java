@@ -3,6 +3,7 @@ package com.med.co.serviceimpl;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
+import com.med.co.entity.Doctor;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -112,26 +113,44 @@ public class AuthServiceImpl implements AuthService {
         // ==========================
         // Fetch User Name based on Role
         // ==========================
+      
+        Long id = null;
         String name = "";
+
         if ("PATIENT".equals(user.getRole().getRoleName().name())) {
+
             name = patientRepository.findByUserrole(user)
                     .map(p -> p.getFirstName() + " " + p.getLastName())
                     .orElse("Patient");
+
         } else if ("DOCTOR".equals(user.getRole().getRoleName().name())) {
-            name = doctorRepository.findByUserrole(user)
-                    .map(d -> d.getFirstName() + " " + d.getLastName())
-                    .orElse("Doctor");
+
+        	Optional<Doctor> doctor = doctorRepository.findByUserrole(user);
+
+        	System.out.println("Logged-in User ID = " + user.getId());
+        	System.out.println("Doctor Found = " + doctor.isPresent());
+
+        	if (doctor.isPresent()) {
+        	    System.out.println("Doctor ID = " + doctor.get().getId());
+
+        	    id = doctor.get().getId();
+        	    name = doctor.get().getFirstName() + " " + doctor.get().getLastName();
+        	} else {
+        	    System.out.println("No doctor mapped to this user.");
+        	    name = "Doctor";
+        	}
         } else {
             name = "Admin";
         }
-
         LoginResponse response = new LoginResponse(
+                id,
                 user.getRole().getRoleName().name(),
                 name,
                 "Bearer",
                 token,
                 jwtUtils.getJwtExpirationMs(),
                 jwtUtils.getJwtExpirationMinutes()
+        
         );
 
         return new ApiResponse<>(

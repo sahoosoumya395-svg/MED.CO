@@ -28,7 +28,7 @@ public class DoctorLeaveRequestDto {
     private LocalDate toDate;
 
     @NotBlank(message = "Reason is required")
-    @Size(min = 5, max = 500, message = "Reason must be between 5 and 500 characters")
+    @Size(min = 3, max = 500, message = "Reason must be between 3 and 500 characters")
     private String reason;
 
 }

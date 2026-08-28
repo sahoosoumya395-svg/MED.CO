@@ -51,9 +51,13 @@ public class DoctorAvailabilityController {
     // Count Available Doctors
     @GetMapping("/available/count")
     public ResponseEntity<AvailableDoctorsCountResponse> countAvailableDoctors(
-            @RequestParam("date")
+            @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate date) {
+
+        if (date == null) {
+            date = LocalDate.now();
+        }
 
         AvailableDoctorsCountResponse response =
                 doctorAvailabilityService.countAvailableDoctorsOn(date);

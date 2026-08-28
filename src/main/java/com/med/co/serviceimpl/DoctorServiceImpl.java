@@ -1,9 +1,9 @@
-
 package com.med.co.serviceimpl;
 
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,24 +17,19 @@ import com.med.co.dto.request.DoctorUpdateRequest;
 import com.med.co.dto.request.LeaveStatusRequestDto;
 import com.med.co.dto.response.DoctorLeaveResponseDto;
 import com.med.co.dto.response.DoctorResponseDto;
-
 import com.med.co.entity.Department;
 import com.med.co.entity.Doctor;
 import com.med.co.entity.Role;
 import com.med.co.entity.UserRole;
-
 import com.med.co.enums.Enums.DoctorStatus;
 import com.med.co.enums.Enums.RoleType;
-
 import com.med.co.exception.BadRequestException;
 import com.med.co.exception.ResourceAlreadyExistsException;
 import com.med.co.exception.ResourceNotFoundException;
-
 import com.med.co.repository.DepartmentRepository;
 import com.med.co.repository.DoctorRepository;
 import com.med.co.repository.RoleRepository;
 import com.med.co.repository.UserRepository;
-
 import com.med.co.service.DoctorService;
 
 import lombok.RequiredArgsConstructor;
@@ -44,19 +39,18 @@ import lombok.RequiredArgsConstructor;
 public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorRepository doctorRepository;
-
     private final UserRepository userRepository;
-
     private final RoleRepository roleRepository;
-
     private final DepartmentRepository departmentRepository;
-
     private final ModelMapper modelMapper;
-
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${doctor.registration.code}")
+    private Integer registrationAccessCode;
 
+    // =========================
     // Register Doctor
+    // =========================
     @Transactional
     @Override
     public DoctorResponseDto registerDoctor(DoctorRegistrationRequest request) {
@@ -89,6 +83,13 @@ public class DoctorServiceImpl implements DoctorService {
                     "Alternate mobile number cannot be same as primary mobile number");
         }
 
+        // Registration access code validation
+        if (registrationAccessCode == null
+                || !registrationAccessCode.equals(request.getRegistrationCode())) {
+
+            throw new BadRequestException("Invalid Registration Access Code");
+        }
+
         // Find DOCTOR role
         Role role = roleRepository.findByRoleName(RoleType.DOCTOR)
                 .orElseThrow(() ->
@@ -100,30 +101,23 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Department not found"));
 
-
         // =========================
-        // CREATE USER ROLE FIRST
+        // CREATE USER
         // =========================
-
         UserRole user = new UserRole();
 
         user.setEmail(request.getEmail().trim().toLowerCase());
-
         user.setPassword(
                 passwordEncoder.encode(request.getPassword())
         );
-
         user.setEnabled(true);
-
         user.setRole(role);
 
         UserRole savedUser = userRepository.save(user);
 
-
         // =========================
         // CREATE DOCTOR
         // =========================
-
         Doctor doctor = new Doctor();
 
         doctor.setFirstName(request.getFirstName().trim());
@@ -137,12 +131,14 @@ public class DoctorServiceImpl implements DoctorService {
         doctor.setLastName(request.getLastName().trim());
 
         doctor.setGender(request.getGender());
-
         doctor.setDateOfBirth(request.getDateOfBirth());
-
         doctor.setBloodGroup(request.getBloodGroup());
 
-        doctor.setNationality(request.getNationality().trim());
+        doctor.setNationality(
+                request.getNationality() == null
+                        ? null
+                        : request.getNationality().trim()
+        );
 
         doctor.setMobileNumber(request.getMobileNumber());
 
@@ -155,11 +151,8 @@ public class DoctorServiceImpl implements DoctorService {
         );
 
         doctor.setAddress(request.getAddress().trim());
-
         doctor.setCity(request.getCity().trim());
-
         doctor.setState(request.getState().trim());
-
         doctor.setCountry(request.getCountry().trim());
 
         doctor.setPinCode(request.getPinCode());
@@ -182,28 +175,35 @@ public class DoctorServiceImpl implements DoctorService {
                 request.getDesignation().trim()
         );
 
+        doctor.setNationality(
+                request.getNationality() == null
+                        ? null
+                        : request.getNationality().trim()
+        );
+
+        doctor.setRegistrationCode(
+                request.getRegistrationCode()
+        );
+
+        // Link department
         doctor.setDepartment(department);
 
+        // Default doctor status
         doctor.setStatus(DoctorStatus.AVAILABLE);
 
-
-        // =========================
-        // LINK DOCTOR WITH USER ROLE
-        // =========================
-
+        // Link Doctor with User
         doctor.setUserrole(savedUser);
 
-
-        // Save doctor
+        // Save Doctor
         Doctor savedDoctor = doctorRepository.save(doctor);
-
 
         // Return response
         return mapDoctorToResponse(savedDoctor);
     }
 
-
+    // =========================
     // Get Doctor By Id
+    // =========================
     @Override
     public DoctorResponseDto getDoctorById(Long id) {
 
@@ -214,8 +214,9 @@ public class DoctorServiceImpl implements DoctorService {
         return mapDoctorToResponse(doctor);
     }
 
-
+    // =========================
     // Common Response Mapping
+    // =========================
     private DoctorResponseDto mapDoctorToResponse(Doctor doctor) {
 
         DoctorResponseDto response =
@@ -235,8 +236,10 @@ public class DoctorServiceImpl implements DoctorService {
         return response;
     }
 
-
-    // Get All Doctors with Pagination and Sorting
+    // =========================
+    // Get All Doctors
+    // Pagination + Sorting
+    // =========================
     @Override
     public Page<DoctorResponseDto> getAllDoctors(
             int page,
@@ -257,10 +260,17 @@ public class DoctorServiceImpl implements DoctorService {
         return doctorPage.map(this::mapDoctorToResponse);
     }
 
-
+    // =========================
+    // Get Doctors By Department
+    // =========================
     @Override
     public List<DoctorResponseDto> getDoctorsByDepartment(
             Long departmentId) {
+
+        // Validate department
+        departmentRepository.findById(departmentId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Department not found"));
 
         List<Doctor> doctors =
                 doctorRepository.findByDepartmentDepartmentId(
@@ -272,8 +282,9 @@ public class DoctorServiceImpl implements DoctorService {
                 .toList();
     }
 
-
+    // =========================
     // Update Doctor
+    // =========================
     @Transactional
     @Override
     public DoctorResponseDto updateDoctor(
@@ -287,7 +298,6 @@ public class DoctorServiceImpl implements DoctorService {
                                         "Doctor not found"
                                 ));
 
-
         // Duplicate Email Validation
         if (doctorRepository.existsByEmailAndIdNot(
                 request.getEmail(), id)) {
@@ -296,7 +306,6 @@ public class DoctorServiceImpl implements DoctorService {
                     "Email already exists"
             );
         }
-
 
         // Duplicate Mobile Validation
         if (doctorRepository.existsByMobileNumberAndIdNot(
@@ -307,8 +316,7 @@ public class DoctorServiceImpl implements DoctorService {
             );
         }
 
-
-        // Duplicate Medical Registration Number Validation
+        // Duplicate Medical Registration Number
         if (doctorRepository
                 .existsByMedicalRegistrationNumberAndIdNot(
                         request.getMedicalRegistrationNumber(),
@@ -318,7 +326,6 @@ public class DoctorServiceImpl implements DoctorService {
                     "Medical registration number already exists"
             );
         }
-
 
         // Alternate mobile validation
         if (request.getAlternateMobileNumber() != null
@@ -331,7 +338,6 @@ public class DoctorServiceImpl implements DoctorService {
             );
         }
 
-
         // Department validation
         Department department =
                 departmentRepository.findById(
@@ -341,9 +347,9 @@ public class DoctorServiceImpl implements DoctorService {
                                 "Department not found"
                         ));
 
-
-        // Updating Doctor Details
-
+        // =========================
+        // Update Doctor Details
+        // =========================
         existingDoctor.setFirstName(
                 request.getFirstName().trim()
         );
@@ -371,7 +377,9 @@ public class DoctorServiceImpl implements DoctorService {
         );
 
         existingDoctor.setNationality(
-                request.getNationality().trim()
+                request.getNationality() == null
+                        ? null
+                        : request.getNationality().trim()
         );
 
         existingDoctor.setMobileNumber(
@@ -426,19 +434,24 @@ public class DoctorServiceImpl implements DoctorService {
                 request.getDesignation().trim()
         );
 
+        existingDoctor.setRegistrationCode(
+                request.getRegistrationCode()
+        );
+
         existingDoctor.setDepartment(
                 department
         );
 
-
+        // Save updated doctor
         Doctor updatedDoctor =
                 doctorRepository.save(existingDoctor);
 
         return mapDoctorToResponse(updatedDoctor);
     }
 
-
+    // =========================
     // Delete Doctor
+    // =========================
     @Override
     public String deleteDoctor(Long id) {
 
@@ -454,8 +467,9 @@ public class DoctorServiceImpl implements DoctorService {
         return "Doctor deleted successfully";
     }
 
-
+    // =========================
     // Update Leave Status
+    // =========================
     @Override
     public DoctorLeaveResponseDto updateLeaveStatus(
             Long leaveId,
@@ -467,12 +481,12 @@ public class DoctorServiceImpl implements DoctorService {
         return null;
     }
 
-
+    // =========================
     // Count Total Doctors
+    // =========================
     @Override
     public long getTotalDoctors() {
 
         return doctorRepository.count();
     }
 }
-

@@ -60,6 +60,9 @@ public class Doctor {
 
 	@Column(nullable = false, length = 50)
 	private String nationality;
+	
+	@Column(name = "registration_code", nullable = false)
+	private Integer registrationCode;
 
 	// Contact Details
 

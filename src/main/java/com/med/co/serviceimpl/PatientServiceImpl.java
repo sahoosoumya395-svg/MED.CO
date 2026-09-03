@@ -31,6 +31,9 @@ import org.springframework.data.domain.Sort;
 import java.util.Random;
 
 import org.springframework.transaction.annotation.Transactional;
+import com.med.co.repository.AppointmentRepository;
+import com.med.co.dto.response.PatientDashboardResponseDto;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +45,7 @@ public class PatientServiceImpl implements PatientService {
     private final RoleRepository roleRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final AppointmentRepository appointmentRepository;
 
     @Transactional
     @Override
@@ -166,6 +170,131 @@ public class PatientServiceImpl implements PatientService {
             return new ApiResponse<>(404,
                     e.getMessage(),
                     null);
+        }
+    }
+    @Override
+    public ApiResponse<?> getPatientDashboard(Long patientId) {
+
+        try {
+
+            Patient patient = patientRepository.findById(patientId)
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException("Patient Not Found"));
+
+            // All appointments of this patient
+            List<com.med.co.entity.Appointment> appointments =
+                    appointmentRepository.findByPatient(patient);
+
+            long totalAppointments = appointments.size();
+
+            // Upcoming appointments
+            long upcomingAppointments = appointments.stream()
+                    .filter(a ->
+                            a.getAppointmentDate() != null
+                            && !a.getAppointmentDate()
+                                    .isBefore(LocalDate.now()))
+                    .count();
+
+            // Number of different doctors consulted
+            long doctorsConsulted = appointments.stream()
+                    .map(a -> a.getDoctor().getId())
+                    .distinct()
+                    .count();
+
+            String fullName =
+                    patient.getFirstName()
+                    + " "
+                    + patient.getLastName();
+
+            String height = patient.getHeight() != null
+                    ? patient.getHeight() + " cm"
+                    : "N/A";
+
+            String weight = patient.getWeight() != null
+                    ? patient.getWeight() + " kg"
+                    : "N/A";
+
+            String bloodGroup = patient.getBloodGroup() != null
+                    ? patient.getBloodGroup().toString()
+                    : "N/A";
+
+            PatientDashboardResponseDto.Stats stats =
+                    PatientDashboardResponseDto.Stats.builder()
+                            .totalAppointments(totalAppointments)
+                            .upcomingAppointments(upcomingAppointments)
+                            .doctorsConsulted(doctorsConsulted)
+                            .build();
+
+            PatientDashboardResponseDto.HealthOverview healthOverview =
+                    PatientDashboardResponseDto.HealthOverview.builder()
+                            .bloodGroup(bloodGroup)
+                            .height(height)
+                            .weight(weight)
+                            .build();
+
+            PatientDashboardResponseDto dashboard =
+                    PatientDashboardResponseDto.builder()
+                            .patientName(fullName)
+                            .stats(stats)
+                            .healthOverview(healthOverview)
+                            .build();
+
+            return new ApiResponse<>(
+                    200,
+                    "Patient Dashboard Data",
+                    dashboard
+            );
+
+        } catch (ResourceNotFoundException e) {
+
+            return new ApiResponse<>(
+                    404,
+                    e.getMessage(),
+                    null
+            );
+
+        } catch (Exception e) {
+
+            return new ApiResponse<>(
+                    500,
+                    e.getMessage(),
+                    null
+            );
+        }
+    }
+    
+    
+    @Override
+    public ApiResponse<?> getPatientByEmail(String email) {
+
+        try {
+
+            Patient patient = patientRepository
+                    .findByUserrole_Email(email)
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Patient Not Found"
+                            ));
+
+            PatientResponseDto responseDto =
+                    modelMapper.map(
+                            patient,
+                            PatientResponseDto.class
+                    );
+
+            return new ApiResponse<>(
+                    200,
+                    "Patient Found",
+                    responseDto
+            );
+
+        } catch (Exception e) {
+
+            return new ApiResponse<>(
+                    404,
+                    e.getMessage(),
+                    null
+            );
         }
     }
     

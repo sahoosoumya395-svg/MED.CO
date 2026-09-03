@@ -13,6 +13,8 @@ public interface PatientService {
     ApiResponse<?> getPatientById(Long patientId);
 
     ApiResponse<?> getPatientByMrn(String mrnNo);   // <-- Add this line
+   
+    ApiResponse<?> getPatientDashboard(Long patientId);
 
     ApiResponse<?> updatePatient(Long patientId, PatientRegistrationRequest request);
 
@@ -21,4 +23,6 @@ public interface PatientService {
     ApiResponse<?> countAllPatients();
 
     ApiResponse<?> countPatientsByDepartment(DepartmentPatientCountRequest request);
+    
+    ApiResponse<?> getPatientByEmail(String email);
 }
